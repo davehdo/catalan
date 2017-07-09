@@ -1,0 +1,3 @@
+rootProject.name = 'Catalan'
+
+include ':app'
