@@ -8,24 +8,40 @@ import {
   View
 } from 'react-native';
 
+const WorldMap = require('./WorldMap');
 
 class GameHome extends Component {
 	constructor(props) {
 	  super(props);
 	  this.state = {
-	    searchString: 'london'
+		  users: [],
+		  round: 0,
+		  turn_of_user: undefined,
+		  world_map: new WorldMap(),
+		  phase: undefined
+		  
 	  };
+	  
+
+	  
 	}
 	
   render() {
+	  // generate a map
+	  // if (this.state.world_map == undefined) {
+	  // 		  
+	  // }
+
+
     return (
       <View style={styles.container}>
         <Text style={styles.description}>
           Search for houses to buy!
         </Text>
-        <Text>
-          Search by place-name, postcode or search near your location. Search by place-name, postcode or search near your location. Search by place-name, postcode or search near your location. Search by place-name, postcode or search near your location.
-        </Text>
+		 
+		 <WorldMap />
+
+
       </View>
     );
   }
