@@ -6,8 +6,12 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+	TouchableOpacity
 } from 'react-native';
+
+const NodeShow = require('./NodeShow.js');
+
 
 const WHEAT = Symbol("WHEAT");
 const SHEEP = Symbol("SHEEP");
@@ -206,7 +210,7 @@ class Edge extends Component{
 		}[ this.indexOnes ]
 		
 		this.styles = {rectangle: {
-			backgroundColor: "red",
+			backgroundColor: "brown",
 			width: this.thickness,
 			height: this.spacing * 0.5,
 			position: "absolute",
@@ -218,7 +222,9 @@ class Edge extends Component{
 	
 	render() {
 		return (
-			 <View key={`edge_${ this.index }`} transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / 2}]} style={this.styles.rectangle} />
+			 <TouchableOpacity key={`edge_${ this.index }`} >
+				<View transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / 2}]} style={this.styles.rectangle} />
+			</TouchableOpacity>
 		)
 	}
 }
@@ -227,6 +233,7 @@ class Edge extends Component{
 class Node extends Component{
 	constructor(props) {
 		super(props);
+
 		this.index = props.index
 		this.contents = undefined
 		this.diameter = 10
@@ -253,7 +260,7 @@ class Node extends Component{
 				width: this.diameter,
 				height: this.diameter,
 				borderRadius: this.diameter / 2.0,
-				backgroundColor: 'green',
+				backgroundColor: 'brown',
 				left:  -this.diameter / 2 + (this.spacing * this.coordinates.x) ,
 				top: -this.diameter / 2 - (this.spacing * this.coordinates.y),
 				
@@ -261,9 +268,20 @@ class Node extends Component{
 		}
 	}
 	
+	navigateToPage() {
+		this.props.navigator.push({
+		  title: 'Node',
+		  component: NodeShow,
+		  passProps: {node: this}
+		});
+	}
+	
 	render() {
 		return (
-			 <View key={`node${ this.index }`} transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / Math.sqrt(3)}]}  style={this.styles.circle} />
+			 <TouchableOpacity key={`node${ this.index }`} onPress={ this.navigateToPage }>
+				<View transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / Math.sqrt(3)}]}  
+					style={this.styles.circle} />
+			</TouchableOpacity>
 		)
 	}
 }
@@ -326,7 +344,7 @@ class WorldMap extends Component {
 	}
 
 	render() { 
-		return( 
+		return(
 			<View style={{ marginTop: 200, marginLeft: 0}} transform={[{ scaleX: 1 }, {scaleY: 1}]}>
 				{this.hexagons.map((h) => h.render())}
 				{this.edges.map((n) => n.render())}

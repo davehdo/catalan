@@ -5,50 +5,31 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View,
-	TouchableOpacity
+  View
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
-const NodeShow = require('./NodeShow');
 
-class GameHome extends Component {
+class NodeShow extends Component {
 	constructor(props) {
 	  super(props);
 	  this.state = {
-		  users: [],
-		  round: 0,
-		  turn_of_user: undefined,
-		  phase: undefined
-		  
+		  node: props.node,
 	  };
 	  
 
 	  
 	}
 	
-
-
   render() {
-	  // generate a map
-	  // if (this.state.world_map == undefined) {
-	  // 		  
-	  // }
-
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => {this.props.navigator.push({
-		  title: 'Node',
-		  component: NodeShow,
-		  passProps: { }
-		}) }}>
-		 <Text style={styles.description}>
-          Search for houses to buy!
+        <Text style={styles.description}>
+          This plot of land 
         </Text>
-		 </TouchableOpacity>
 		 
-		<WorldMap />
+
 
 
       </View>
@@ -71,4 +52,4 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = GameHome;
+module.exports = NodeShow;
