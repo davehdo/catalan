@@ -46,7 +46,11 @@ const hexagonCoordinates = {
 		"-5": {x: -2, y: -1.73205080756888}, 
 		"-6": {x: -1.5, y: -2.59807621135332}, 
 		"-7": {x: -0.500000000000001, y: -2.59807621135332}, 
-		"-8": {x: 0.499999999999999, y: -2.59807621135332}
+		"-8": {x: 0.499999999999999, y: -2.59807621135332},
+		"-9": {x: 1.5, y: -2.59807621135332}, 
+		"-10": {x: 2, y: -1.73205080756888}, 
+		"-11": {x: 2.5, y: -0.866025403784439}, 
+		"-12": {x: 3, y: 0}, 
 	}
 		
 class Hexagon extends Component {
@@ -58,15 +62,15 @@ class Hexagon extends Component {
 		
 		this.coordinates = hexagonCoordinates[ this.index ]
 		
-		this.width = 60 
+		this.width = 65 
 		this.spacing = 65
 		
 		this.styles = {
-			hexagon: {
+			hexagon: { // the top of this obj is actually the top of the rectangular component of the hexagon
 				width: 100 * this.width / 100,
 				height: 55 * this.width / 100,
-				left: 0 + (this.coordinates ? (this.spacing * this.coordinates.x) : 0 ),
-				top: 0 - (this.coordinates ? (this.spacing * this.coordinates.y) : 0),
+				left: -this.width / 2 + (this.coordinates ? (this.spacing * this.coordinates.x) : 0 ),
+				top: -( 55 / 100 * this.width) / 2 - (this.coordinates ? (this.spacing * this.coordinates.y) : 0),
 				position: "absolute",
 				justifyContent: "center", 
 				alignItems: "center"
@@ -179,41 +183,79 @@ class Hexagon extends Component {
 	  
 }
 
-class Edge {
+class Edge extends Component{
 	constructor(props) {
-		this.number = props.number
+		super(props);
+		this.index = props.index
 		this.contents = undefined
+		
+		this.spacing = 65
+		this.thickness = 6
+		this.indexSign = this.index > 0 ? 1 : -1
+		this.indexTens = this.indexSign * Math.floor( Math.abs(this.index) / 10.0)
+		this.indexOnes = Math.abs(this.index) % 10.0
+		
+		let center = hexagonCoordinates[this.indexTens ] || {x: 0, y: 0}
+		
+		this.coordinates =  {x: center.x, y: center.y }
+		
+		this.rotation = {
+			0: -60,
+			1: 0,
+			2: 60
+		}[ this.indexOnes ]
+		
+		this.styles = {rectangle: {
+			backgroundColor: "red",
+			width: this.thickness,
+			height: this.spacing * 0.5,
+			position: "absolute",
+			left: -this.thickness * 0.5 + this.coordinates.x * this.spacing ,
+			top: -this.spacing * 0.25 - this.coordinates.y * this.spacing ,			
+		}}
+		
+	}
+	
+	render() {
+		return (
+			 <View key={`edge_${ this.index }`} transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / 2}]} style={this.styles.rectangle} />
+		)
 	}
 }
+
 
 class Node extends Component{
 	constructor(props) {
 		super(props);
 		this.index = props.index
 		this.contents = undefined
+		this.diameter = 10
+		this.spacing = 65
 		
-		this.spacing = 75
+		// index will be like 061 or -061
+		// 061 -> should be separated to 06 and 1
+		// -061 -> should be separated to -06 and 1
+		this.indexSign = this.index > 0 ? 1 : -1
+		this.indexTens = this.indexSign * Math.floor( Math.abs(this.index) / 10.0)
+		this.indexOnes = Math.abs(this.index) % 10.0
 		
+		this.rotation = {
+			0: -90,
+			1: -30,
+		}[ this.indexOnes ]
 		
-		let center = hexagonCoordinates[ Math.floor(this.index / 10.0) ] || {x: 0, y: 0}
-		let adjust = {
-			0: {x: 0, y: this.spacing / 2},
-			1: {x: 0.866025404 * this.spacing, y: 0.5 * this.spacing},
-			// 2: {x: 0.866025404 * this.spacing, y: -0.5 * this.spacing}
-		}[ this.index % 10 ] || {x: 0, y: 0}
-		
-		this.coordinates =  {x: center.x + adjust.x, y: center.y + adjust.y}
+		this.coordinates =  hexagonCoordinates[this.indexTens ] || {x: 0, y: 0}
 		
 		
 		this.styles = {
 			circle: {
 				position: "absolute",
-				width: 1000,
-				height: 1000,
-				// borderRadius: 100 / 2.0,
-				backgroundColor: 'red',
-				left: Math.random() * 100, // 0 + (this.coordinates ? (this.spacing * this.coordinates.x) : 0 ),
-				top: Math.random() * 100, //0 - (this.coordinates ? (this.spacing * this.coordinates.y) : 0),
+				width: this.diameter,
+				height: this.diameter,
+				borderRadius: this.diameter / 2.0,
+				backgroundColor: 'green',
+				left:  -this.diameter / 2 + (this.spacing * this.coordinates.x) ,
+				top: -this.diameter / 2 - (this.spacing * this.coordinates.y),
 				
 			}
 		}
@@ -221,9 +263,7 @@ class Node extends Component{
 	
 	render() {
 		return (
-			 <View key={`node${ this.index }`} style={styles.circle} >
-			<Text>Hi</Text>
-			</View>
+			 <View key={`node${ this.index }`} transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / Math.sqrt(3)}]}  style={this.styles.circle} />
 		)
 	}
 }
@@ -240,44 +280,58 @@ class WorldMap extends Component {
 		this.hexagons = resources.map((r,i) => new Hexagon({index: i, number: r == DESERT ? undefined : numbers.shift(), resource: r}) ) // 19
 		
 		// produce the edges
-		// this.edges = []
+		this.edges = []
 		
-		// this.hexagons.map((h) => {
-		//
-		// 	h.edges = [
-		// 		new Edge({number: h.number * 10}),
-		// 		new Edge({number: h.number * 10 + 1}),
-		// 		new Edge({number: h.number * 10 + 2})
-		// 	]
-		//
-		// 	this.edges << h.edges
-		// })
-		//
-		// [-1, -2, -16, -17, -18].map((n) => {
-		// 	this.edges << new Edge({number: n * 10 + 2})
-		// })
-		//
-		// [-1, -2, -3, -4, -5].map((n) => {
-		// 	this.edges << new Edge({number: n * 10 + 1})
-		// })
-		//
-		// [-4, -5, -6, -7, -8].map((n) => {
-		// 	this.edges << new Edge({number: n * 10 })
-		// })
+		this.hexagons.map((h) => {
+
+			this.edges.push(new Edge({index: h.index * 10}))
+			this.edges.push(new Edge({index: h.index * 10 + 1}))
+			this.edges.push(new Edge({index: h.index * 10 + 2}))
+			
+		})
+
+		let edgesA = [-1, -2, -16, -17, -18]
+		edgesA.map((n) => {
+			this.edges.push(new Edge({index: n * 10 - 2}))
+		})
+
+		let edgesB = [-1, -2, -3, -4, -5]
+		edgesB.map((n) => {
+			this.edges.push(new Edge({index: n * 10 - 1}))
+		})
+
+		let edgesC = [-4, -5, -6, -7, -8]
+		edgesC.map((n) => {
+			this.edges.push(new Edge({index: n * 10 }))
+		})
+
+		
 		this.nodes = []
 			
 		this.hexagons.map((h) => {
-
-			this.nodes << new Node({index: h.number * 10})
-			this.hodes << new Node({index: h.number * 10 + 1})
+			this.nodes.push(new Node({index: h.index * 10}))
+			this.nodes.push(new Node({index: h.index * 10 + 1}))
 		})
+		
+		let a = [-4, -5, -6, -7, -8, -9, -10, -11]
+		a.map((n) => {
+			this.nodes.push(new Node({index: n * 10}))
+		})
+
+		let b = [-1, -2, -3, -4, -5, -6, -7, -8]
+		b.map((n) => {
+			this.nodes.push(new Node({index: n * 10 - 1}))
+		})
+				
 	}
 
 	render() { 
 		return( 
-			<View style={{ marginTop: 200, marginLeft: -60}}>
-			{this.nodes.map((n) => n.render())}
-			{this.hexagons.map((h) => h.render())}
+			<View style={{ marginTop: 200, marginLeft: 0}} transform={[{ scaleX: 1 }, {scaleY: 1}]}>
+				{this.hexagons.map((h) => h.render())}
+				{this.edges.map((n) => n.render())}
+				{this.nodes.map((n) => n.render())}
+
 			</View>
 		)
 		}
