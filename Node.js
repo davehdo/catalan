@@ -15,6 +15,7 @@ const NodeShow = require('./NodeShow.js');
 
 const nodeDiameter = 30
 const hexagonSpacing = 200
+
 const hexagonCoordinates = {
 		18: {x: 0, y: 0}, 
 		14: {x: 1, y: 0}, 
@@ -91,8 +92,8 @@ class Node extends Component{
 				height: nodeDiameter,
 				borderRadius: nodeDiameter / 2.0,
 				backgroundColor: 'brown',
-				left:  -nodeDiameter / 2 + (hexagonSpacing * this.coordinates.x) ,
-				top: -nodeDiameter / 2 - (hexagonSpacing * this.coordinates.y),
+				left:  -nodeDiameter / 2,
+				top: -nodeDiameter / 2,
 				
 			}
 		}
@@ -110,6 +111,37 @@ class Node extends Component{
 				return "Empty lot"
 		}
 	}
+	
+	
+	shape() {
+		switch( this.contents ) {
+			case 1: 
+				return <View transform={[
+					{translateX: (hexagonSpacing * this.coordinates.x)}, 
+					{translateY: -(hexagonSpacing * this.coordinates.y)}
+				]} style={styles.settlement}>
+				        <View style={styles.settlementHexagonInner} />
+				        <View style={styles.settlementHexagonBefore} />
+				      </View>
+				break;
+			case 2:
+				return <View transform={[
+					{translateX: (hexagonSpacing * this.coordinates.x)}, 
+					{translateY: -(hexagonSpacing * this.coordinates.y)}
+				]} style={styles.city}>
+				        <View style={styles.cityHexagonInner} />
+				        <View style={styles.cityHexagonBefore} />
+				      </View>
+				break;
+			default:
+				return <View transform={[
+					{translateX: (hexagonSpacing * this.coordinates.x)}, 
+					{translateY: -(hexagonSpacing * this.coordinates.y)}
+				]} style={this.styles.circle} />
+		}
+	}
+	
+	
 	render() {
 		return (
 			<TouchableOpacity key={`node_${ this.index }`} onPress={ () => {
@@ -119,13 +151,70 @@ class Node extends Component{
 					  passProps: {node: this}
 					});
 				}}>
-				<View //transform={[{ rotate: `${ this.rotation }deg`}, {translateX: hexagonSpacing / Math.sqrt(3)}]}  
-					style={this.styles.circle} />
+				{ this.shape() }
 			</TouchableOpacity>
 		)
 	}
 }
 
+const settlementWidth = 55
+const cityWidth = 80
 
+const styles = StyleSheet.create({
+   settlement: {
+	  position: "absolute",
+		left: -50 / 100 * settlementWidth,
+		top: -25 / 100 * settlementWidth,
+     width: 100 / 100 * settlementWidth,
+     height: 55 / 100 * settlementWidth
+   },
+   settlementHexagonInner: {
+     width: 100 / 100 * settlementWidth,
+     height: 55 / 100 * settlementWidth,
+     backgroundColor: 'red'
+   },
+   settlementHexagonBefore: {
+     position: 'absolute',
+     top: -35 / 100 * settlementWidth,
+     left: 0,
+     width: 0,
+     height: 0,
+     borderStyle: 'solid',
+     borderLeftWidth: 50 / 100 * settlementWidth,
+     borderLeftColor: 'transparent',
+     borderRightWidth: 50 / 100 * settlementWidth,
+     borderRightColor: 'transparent',
+     borderBottomWidth: 35 / 100 * settlementWidth,
+     borderBottomColor: 'red'
+   },
+	
+   city: {
+	  position: "absolute",
+		left: -50 / 100 * cityWidth,
+		top: -25 / 100 * cityWidth,
+     width: 100 / 100 * cityWidth,
+     height: 45 / 100 * cityWidth
+   },
+   cityHexagonInner: {
+     width: 100 / 100 * cityWidth,
+     height: 45 / 100 * cityWidth,
+     backgroundColor: 'red'
+   },
+   cityHexagonBefore: {
+     position: 'absolute',
+     top: -25 / 100 * cityWidth,
+     left: 0,
+     width: 0,
+     height: 0,
+     borderStyle: 'solid',
+     borderLeftWidth: 30 / 100 * cityWidth,
+     borderLeftColor: 'transparent',
+     borderRightWidth: 30 / 100 * cityWidth,
+     borderRightColor: 'transparent',
+     borderBottomWidth: 25 / 100 * cityWidth,
+     borderBottomColor: 'red'
+   }
+	
+});
 
 module.exports = Node;

@@ -6,7 +6,8 @@ import {
   StyleSheet,
   Text,
   View,
-	TouchableOpacity
+	TouchableOpacity,
+	Button
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
@@ -15,12 +16,19 @@ const MapHeight = 300
 class NodeShow extends Component {
 	constructor(props) {
 	  super(props);
-	  this.state = {
-		  // node: props.node,
-	  };
-	  
-
-	  
+	  this.state = { };
+	}
+	
+	buildSettlement() {
+		this.props.node.contents = 1
+			// ownedByUser
+		
+	}
+	
+	buildCity() {
+		this.props.node.contents = 2
+			// ownedByUser
+		
 	}
 	
   render() {
@@ -30,9 +38,7 @@ class NodeShow extends Component {
 			<Text style={styles.description}>
 				{ this.props.node.displayContents() } { this.props.node.index }
 			</Text>
-			<Text style={styles.description}>
 
-			</Text>
 
 			<View style={{ backgroundColor: "whitesmoke", flexDirection: "row"}}>
 				<View style={{flex: 1 }}></View>
@@ -44,23 +50,27 @@ class NodeShow extends Component {
 
 					{ this.props.node.hexagons.map((h) => h.render())}
 				 	{ this.props.node.edges.map((h) => h.render())}
-					{ this.props.node.render()}
+					{ this.props.node.hexagons.map((h) => h.nodes.map((n) => n.render() ))}
+					
 					</View>
 				</View>
 			</View>
 
 			<View style={{ flexDirection: "column", justifyContent: "flex-start"}}>
-				<TouchableOpacity style={{ flexDirection: "row", margin: 10 }}>
-					<View style={ styles.button }>
-						<Text>Build a city</Text>
-					 </View>
-				</TouchableOpacity>
-
-				<TouchableOpacity>
-					<View style={ styles.button }>
-						<Text>Build a settlement</Text>
-					 </View>
-				</TouchableOpacity>
+				 <Button
+				   onPress={() => this.buildSettlement()}
+				   title="Build a settlement"
+				   color="#841584"
+				   accessibilityLabel="Learn more about this purple button"
+				 />
+					
+				 <Button
+				   onPress={() => this.buildCity()}
+				   title="Build a city"
+				   color="#841584"
+				   accessibilityLabel="Learn more about this purple button"
+				 />
+					
 			</View>
 
 		</View>
@@ -71,7 +81,8 @@ class NodeShow extends Component {
 var styles = StyleSheet.create({
 	button: {
 		borderColor: "black",
-		flex: 1,
+		// flex: 1,
+		padding: 10,
 		flexDirection: "column",
 		backgroundColor: "blue"
 	},
@@ -82,7 +93,7 @@ var styles = StyleSheet.create({
     color: '#656565'
   },
   container: {
-	  flex: 1,
+	  // flex: 1,
     padding: 30,
     marginTop: 65,
     alignItems: 'center'

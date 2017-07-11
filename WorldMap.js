@@ -277,6 +277,13 @@ class WorldMap extends Component {
 				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.5 ) ** 2
 			})
 		})
+		
+		// associate
+		this.hexagons.map((h) => {
+			h.nodes = this.nodes.filter( (n) => {
+				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.9 ) ** 2
+			})
+		})
 				
 	}
 
