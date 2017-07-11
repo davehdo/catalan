@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 
 const NodeShow = require('./NodeShow.js');
+const Node = require("./Node.js")
+const Edge = require("./Edge.js")
 
 
 const WHEAT = Symbol("WHEAT");
@@ -19,6 +21,9 @@ const LUMBER = Symbol("LUMBER");
 const BRICK = Symbol("BRICK");
 const ORE = Symbol("ORE");
 const DESERT = Symbol("DESERT");
+
+const MapHeight = 340
+const hexagonSpacing = 200
 
 const hexagonCoordinates = {
 		18: {x: 0, y: 0}, 
@@ -64,24 +69,23 @@ class Hexagon extends Component {
 		this.resource = props.resource
 		this.index = props.index
 		
-		this.coordinates = hexagonCoordinates[ this.index ]
+		this.coordinates = hexagonCoordinates[ this.index ] || {x: 0, y: 0}
 		
-		this.width = 65 
-		this.spacing = 65
+		this.width = hexagonSpacing 
 		
 		this.styles = {
 			hexagon: { // the top of this obj is actually the top of the rectangular component of the hexagon
-				width: 100 * this.width / 100,
-				height: 55 * this.width / 100,
-				left: -this.width / 2 + (this.coordinates ? (this.spacing * this.coordinates.x) : 0 ),
-				top: -( 55 / 100 * this.width) / 2 - (this.coordinates ? (this.spacing * this.coordinates.y) : 0),
+				width: this.width,
+				height: 1.07 * this.width / Math.sqrt(3),
+				left: -this.width / 2 + (this.coordinates ? (hexagonSpacing * this.coordinates.x) : 0 ),
+				top: -(this.width / Math.sqrt(3)) / 2 - (this.coordinates ? (hexagonSpacing * this.coordinates.y) : 0),
 				position: "absolute",
 				justifyContent: "center", 
 				alignItems: "center"
 			},
 			hexagonInner: {
-				width: 100 * this.width / 100,
-				height: 55 * this.width / 100,
+				width: this.width,
+				height: 1.07 * this.width / Math.sqrt(3),
 				backgroundColor: this.color()
 			},
 			hexagonAfter: {
@@ -179,7 +183,7 @@ class Hexagon extends Component {
 				<View style={this.styles.hexagonBefore} />
 				<View style={this.styles.hexagonAfter} />
 			 <View style={{ position: "absolute"}}>
-				<Text style={{ backgroundColor: "transparent"}}>{ this.number }</Text>
+				<Text style={{ backgroundColor: "transparent", fontSize: 40}}>{ this.number }</Text>
 			 </View>
 	      </View>
 	    )
@@ -187,113 +191,35 @@ class Hexagon extends Component {
 	  
 }
 
-class Edge extends Component{
-	constructor(props) {
-		super(props);
-		this.index = props.index
-		this.contents = undefined
-		
-		this.spacing = 65
-		this.thickness = 6
-		this.indexSign = this.index > 0 ? 1 : -1
-		this.indexTens = this.indexSign * Math.floor( Math.abs(this.index) / 10.0)
-		this.indexOnes = Math.abs(this.index) % 10.0
-		
-		let center = hexagonCoordinates[this.indexTens ] || {x: 0, y: 0}
-		
-		this.coordinates =  {x: center.x, y: center.y }
-		
-		this.rotation = {
-			0: -60,
-			1: 0,
-			2: 60
-		}[ this.indexOnes ]
-		
-		this.styles = {rectangle: {
-			backgroundColor: "brown",
-			width: this.thickness,
-			height: this.spacing * 0.5,
-			position: "absolute",
-			left: -this.thickness * 0.5 + this.coordinates.x * this.spacing ,
-			top: -this.spacing * 0.25 - this.coordinates.y * this.spacing ,			
-		}}
-		
-	}
-	
-	render() {
-		return (
-			 <TouchableOpacity key={`edge_${ this.index }`} >
-				<View transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / 2}]} style={this.styles.rectangle} />
-			</TouchableOpacity>
-		)
-	}
-}
-
-
-class Node extends Component{
-	constructor(props) {
-		super(props);
-
-		this.index = props.index
-		this.contents = undefined
-		this.diameter = 10
-		this.spacing = 65
-		
-		// index will be like 061 or -061
-		// 061 -> should be separated to 06 and 1
-		// -061 -> should be separated to -06 and 1
-		this.indexSign = this.index > 0 ? 1 : -1
-		this.indexTens = this.indexSign * Math.floor( Math.abs(this.index) / 10.0)
-		this.indexOnes = Math.abs(this.index) % 10.0
-		
-		this.rotation = {
-			0: -90,
-			1: -30,
-		}[ this.indexOnes ]
-		
-		this.coordinates =  hexagonCoordinates[this.indexTens ] || {x: 0, y: 0}
-		
-		
-		this.styles = {
-			circle: {
-				position: "absolute",
-				width: this.diameter,
-				height: this.diameter,
-				borderRadius: this.diameter / 2.0,
-				backgroundColor: 'brown',
-				left:  -this.diameter / 2 + (this.spacing * this.coordinates.x) ,
-				top: -this.diameter / 2 - (this.spacing * this.coordinates.y),
-				
-			}
-		}
-	}
-	
-	navigateToPage() {
-		this.props.navigator.push({
-		  title: 'Node',
-		  component: NodeShow,
-		  passProps: {node: this}
-		});
-	}
-	
-	render() {
-		return (
-			 <TouchableOpacity key={`node${ this.index }`} onPress={ this.navigateToPage }>
-				<View transform={[{ rotate: `${ this.rotation }deg`}, {translateX: this.spacing / Math.sqrt(3)}]}  
-					style={this.styles.circle} />
-			</TouchableOpacity>
-		)
-	}
-}
 
 class WorldMap extends Component {
+	shuffle(array) {
+	    let counter = array.length;
+
+	    // While there are elements in the array
+	    while (counter > 0) {
+	        // Pick a random index
+	        let index = Math.floor(Math.random() * counter);
+
+	        // Decrease counter by 1
+	        counter--;
+
+	        // And swap the last element with it
+	        let temp = array[counter];
+	        array[counter] = array[index];
+	        array[index] = temp;
+	    }
+
+	    return array;
+	}
+	
 	constructor(props) {
 		super(props);
 		// by convention, flat on top
 		// numbering is outside-in with a spiral
 		// starting top row, left most hexagon, and moving clockwise
 		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
-		let resources = [DESERT, WHEAT, WHEAT, WHEAT, WHEAT, SHEEP, SHEEP, SHEEP, SHEEP, LUMBER, LUMBER, LUMBER, LUMBER, BRICK, BRICK, BRICK, ORE, ORE, ORE ] //.sort((r)=> r ? Math.random() : 0)
+		let resources = this.shuffle([DESERT, WHEAT, WHEAT, WHEAT, WHEAT, SHEEP, SHEEP, SHEEP, SHEEP, LUMBER, LUMBER, LUMBER, LUMBER, BRICK, BRICK, BRICK, ORE, ORE, ORE ]) //.sort((r)=> r ? Math.random() : 0)
 
 		this.hexagons = resources.map((r,i) => new Hexagon({index: i, number: r == DESERT ? undefined : numbers.shift(), resource: r}) ) // 19
 		
@@ -327,29 +253,46 @@ class WorldMap extends Component {
 		this.nodes = []
 			
 		this.hexagons.map((h) => {
-			this.nodes.push(new Node({index: h.index * 10}))
-			this.nodes.push(new Node({index: h.index * 10 + 1}))
+			this.nodes.push(new Node({navigator: this.props.navigator, index: h.index * 10}))
+			this.nodes.push(new Node({navigator: this.props.navigator, index: h.index * 10 + 1}))
 		})
 		
 		let a = [-4, -5, -6, -7, -8, -9, -10, -11]
 		a.map((n) => {
-			this.nodes.push(new Node({index: n * 10}))
+			this.nodes.push(new Node({navigator: this.props.navigator, index: n * 10}))
 		})
 
 		let b = [-1, -2, -3, -4, -5, -6, -7, -8]
 		b.map((n) => {
-			this.nodes.push(new Node({index: n * 10 - 1}))
+			this.nodes.push(new Node({navigator: this.props.navigator, index: n * 10 - 1}))
+		})
+		
+		// associate nodes -> hexagons and nodes -> edges
+		this.nodes.map((n) => {
+			n.hexagons = this.hexagons.filter( (h) => {
+				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.9 ) ** 2
+			}) 
+			
+			n.edges = this.edges.filter( (h) => {
+				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.5 ) ** 2
+			})
 		})
 				
 	}
 
-	render() { 
+	render() {
+		
 		return(
-			<View style={{ marginTop: 200, marginLeft: 0}} transform={[{ scaleX: 1 }, {scaleY: 1}]}>
-				{this.hexagons.map((h) => h.render())}
-				{this.edges.map((n) => n.render())}
-				{this.nodes.map((n) => n.render())}
+			<View style={{ backgroundColor: "lightblue", flexDirection: "row"  }}>
+				<View style={{flex: 1 }}></View>
 
+				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }} >
+					<View transform={[{scaleX: 0.3}, {scaleY: 0.3}]} style={{ position: "absolute"}}>
+						{this.hexagons.map((h) => h.render())}
+						{this.edges.map((n) => n.render())}
+						{this.nodes.map((n) => n.render())}
+					</View>
+				</View>
 			</View>
 		)
 		}

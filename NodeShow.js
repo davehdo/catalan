@@ -5,16 +5,18 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+	TouchableOpacity
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
+const MapHeight = 300
 
 class NodeShow extends Component {
 	constructor(props) {
 	  super(props);
 	  this.state = {
-		  node: props.node,
+		  // node: props.node,
 	  };
 	  
 
@@ -24,20 +26,55 @@ class NodeShow extends Component {
   render() {
 
     return (
-      <View style={styles.container}>
-        <Text style={styles.description}>
-          This plot of land 
-        </Text>
-		 
+		<View style={styles.container}>
+			<Text style={styles.description}>
+				{ this.props.node.displayContents() } { this.props.node.index }
+			</Text>
+			<Text style={styles.description}>
 
+			</Text>
 
+			<View style={{ backgroundColor: "whitesmoke", flexDirection: "row"}}>
+				<View style={{flex: 1 }}></View>
 
-      </View>
+				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }}>
+					<View transform={[{scaleX: 0.3}, {scaleY: 0.3}, 
+						{translateX: -200 * this.props.node.coordinates.x }, 
+						{translateY: 200 * this.props.node.coordinates.y }]} style={{ position: "absolute"}}>		
+
+					{ this.props.node.hexagons.map((h) => h.render())}
+				 	{ this.props.node.edges.map((h) => h.render())}
+					{ this.props.node.render()}
+					</View>
+				</View>
+			</View>
+
+			<View style={{ flexDirection: "column", justifyContent: "flex-start"}}>
+				<TouchableOpacity style={{ flexDirection: "row", margin: 10 }}>
+					<View style={ styles.button }>
+						<Text>Build a city</Text>
+					 </View>
+				</TouchableOpacity>
+
+				<TouchableOpacity>
+					<View style={ styles.button }>
+						<Text>Build a settlement</Text>
+					 </View>
+				</TouchableOpacity>
+			</View>
+
+		</View>
     );
   }
 }
 
 var styles = StyleSheet.create({
+	button: {
+		borderColor: "black",
+		flex: 1,
+		flexDirection: "column",
+		backgroundColor: "blue"
+	},
   description: {
     marginBottom: 20,
     fontSize: 18,
@@ -50,6 +87,8 @@ var styles = StyleSheet.create({
     marginTop: 65,
     alignItems: 'center'
   }
+  
+  
 });
 
 module.exports = NodeShow;

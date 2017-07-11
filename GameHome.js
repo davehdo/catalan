@@ -22,35 +22,25 @@ class GameHome extends Component {
 		  phase: undefined
 		  
 	  };
-	  
-
-	  
 	}
-	
-
 
   render() {
-	  // generate a map
-	  // if (this.state.world_map == undefined) {
-	  // 		  
-	  // }
-
-
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => {this.props.navigator.push({
-		  title: 'Node',
-		  component: NodeShow,
-		  passProps: { }
-		}) }}>
-		 <Text style={styles.description}>
-          Search for houses to buy!
-        </Text>
-		 </TouchableOpacity>
+        
+		<View style={{ flexDirection: "row", justifyContent: "flex-start", padding: 10, backgroundColor: "tan" }}>
+		 	<View style={{ backgroundColor: "whitesmoke", height: 50, width: 50 }}>
+		 	</View>
+		 	<View style={{ flex: 1 }}>
+				<Text style={styles.description}>
+				 House Tyrell, its your turn
+				</Text>
+		 	</View>
+		</View>
+		
+		<WorldMap navigator={this.props.navigator}/>
 		 
-		<WorldMap />
-
-
+		 
       </View>
     );
   }
@@ -64,8 +54,8 @@ var styles = StyleSheet.create({
     color: '#656565'
   },
   container: {
-	  flex: 1,
-    padding: 30,
+	 flex: 1,
+    // padding: 10,
     marginTop: 65,
     alignItems: 'center'
   }
