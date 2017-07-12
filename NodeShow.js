@@ -31,7 +31,7 @@ class NodeShow extends Component {
 		} else if (this.props.node.state.contents >= 1 && this.props.node.state.ownedByUser != this.props.game.state.turnOfUser) {
 		// if already a building there
 			this.setState({message: "Cannot build on someone else's property!"})
-		} else if (this.props.node.adjacentNodes.filter((n) => n.state.contents ).length > 0) {
+		} else if (this.props.node.adjacentNodes.filter((n) => n && n.state.contents ).length > 0) {
 		// if too close to others
 			this.setState({message: "Cannot build too close to others!"})
 			return true
@@ -85,10 +85,13 @@ class NodeShow extends Component {
 	
   render() {
 
+	//  	
+	// 
+	
     return (
 		<View style={styles.container}>
 			<Text style={styles.description}>
-				{ this.props.node.displayContents() } { this.props.node.index }{"\n"}
+				{ this.props.node.displayContents() } { this.props.node.props.index }{"\n"}
 				{ this.props.node.state.ownedByUser ? `Owned by ${this.props.node.state.ownedByUser.state.name}` : ""}
 			</Text>
 			<Text style={styles.description}>
@@ -104,10 +107,10 @@ class NodeShow extends Component {
 						{translateX: -200 * this.props.node.coordinates.x }, 
 						{translateY: 200 * this.props.node.coordinates.y }]} style={{ position: "absolute"}}>		
 
-					{ this.props.node.hexagons.map((h) => h.render())}
-				 	{ this.props.node.edges.map((h) => h.render())}
-					{ this.props.node.hexagons.map((h) => h.nodes.map((n) => n.render() ))}
-					
+						{ this.props.node.adjacentHexagons.map((h) => h.render())}
+						{ this.props.node.adjacentEdges.map((h) => h.render())}
+						{ this.props.node.adjacentHexagons.map((h) => h.adjacentNodes.map((n) => n.render() ))}
+
 					</View>
 				</View>
 			</View>

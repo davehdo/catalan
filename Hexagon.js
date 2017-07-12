@@ -21,11 +21,11 @@ class Hexagon extends Component {
 	constructor(props) {
 		super(props); // props includes highlight, number, resource, and index
 		
-		this.state = {}
-		
-		this.index = props.index
-		
-		this.coordinates = Globals.hexagonCoordinates[ this.index ] || {x: 0, y: 0}
+		this.state = {
+			highlight: props.highlight
+		}
+				
+		this.coordinates = Globals.hexagonCoordinates[ this.props.index ] || {x: 0, y: 0}
 		
 		let sideToSideWidth = Globals.hexagonSpacing 
 		
@@ -131,15 +131,26 @@ class Hexagon extends Component {
 		return r
 	}
 	
+	get adjacentNodes() {
+		return this.props.nodesWithinRadius( this, 1 / Math.sqrt( 3 ) )
+	}
+	
+	// get adjacentHexagons() {
+	// 	return this.props.hexagonsWithinRadius( this, 1 / Math.sqrt( 3 ) )
+	// }
+	
+	// get adjacentEdges() {
+	// 	return this.props.edgesWithinRadius( this, 0.5 / Math.sqrt( 3 ) )
+	// }
 	
 	render() {
 	    return (
-	      <View key={ `hex_${this.index}` } style={this.styles.hexagon}>
+	      <View key={ `hex_${this.props.index}` } style={this.styles.hexagon}>
 				<View style={this.styles.hexagonInner} />
 				<View style={this.styles.hexagonBefore} />
 				<View style={this.styles.hexagonAfter} />
 			 <View style={{ position: "absolute"}}>
-				<Text style={ this.state.highlightNumber == this.props.number ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
+				<Text style={ this.state.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
 			 </View>
 	      </View>
 	    )

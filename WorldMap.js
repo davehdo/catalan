@@ -22,7 +22,7 @@ class WorldMap extends Component {
 		
 	constructor(props) {
 		super(props);
-		// props include turnOfUser and navigator and highlightNumber
+		// props include highlightNumber and onPressNode
 		
 		this.state = {
 			highlightNumber: props.highlightNumber
@@ -35,79 +35,88 @@ class WorldMap extends Component {
 		let resources = this.shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)
 		let num
 		
-		this.hexagons = resources.map((r,i) => new Hexagon({index: i, number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), resource: r, parentWorldMap: this}) ) // 19
+		this.hexagons = []
+		
+		this.hexagonAttributes = resources.map((r,i) => {
+			return {index: i, 
+				number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), 
+				resource: r}  // 19
+		})
 		
 		// ==========================  produce the edges  ==========================
 		this.edges = []
 		
-		this.hexagons.map((h) => {
-
-			this.edges.push(new Edge({index: h.index * 10}))
-			this.edges.push(new Edge({index: h.index * 10 + 1}))
-			this.edges.push(new Edge({index: h.index * 10 + 2}))
-			
+		this.edgeAttributes = []
+		
+		this.hexagonAttributes.map((h) => {
+			this.edgeAttributes.push({index: h.index * 10})
+			this.edgeAttributes.push({index: h.index * 10 + 1})
+			this.edgeAttributes.push({index: h.index * 10 + 2})
 		})
 
 		let edgesA = [-1, -2, -16, -17, -18]
-		edgesA.map((n) => {
-			this.edges.push(new Edge({index: n * 10 - 2}))
-		})
+		edgesA.map((n) => { this.edgeAttributes.push({index: n * 10 - 2}) })
 
 		let edgesB = [-1, -2, -3, -4, -5]
-		edgesB.map((n) => {
-			this.edges.push(new Edge({index: n * 10 - 1}))
-		})
+		edgesB.map((n) => { this.edgeAttributes.push({index: n * 10 - 1}) })
 
 		let edgesC = [-4, -5, -6, -7, -8]
-		edgesC.map((n) => {
-			this.edges.push(new Edge({index: n * 10 }))
-		})
+		edgesC.map((n) => { this.edgeAttributes.push({index: n * 10 }) })
 
 		// ==========================  produce the nodes  ==========================
 		this.nodes = []
 			
-						
-		this.hexagons.map((h) => {
-			this.nodes.push(new Node({navigator: this.props.navigator, onPress: this.props.onPressNode, index: h.index * 10}))
-			this.nodes.push(new Node({navigator: this.props.navigator, onPress: this.props.onPressNode, index: h.index * 10 + 1}))
-		})
+		this.nodeAttributes = []
 		
+		this.hexagonAttributes.map((h) => {
+			this.nodeAttributes.push( {index: h.index * 10 } )
+			this.nodeAttributes.push( {index: h.index * 10 + 1 } )
+		})				
+
 		let a = [-4, -5, -6, -7, -8, -9, -10, -11]
-		a.map((n) => {
-			this.nodes.push(new Node({navigator: this.props.navigator, onPress: this.props.onPressNode, index: n * 10}))
-		})
+		a.map((n) => { this.nodeAttributes.push({ index: n * 10}) })
 
 		let b = [-1, -2, -3, -4, -5, -6, -7, -8]
-		b.map((n) => {
-			this.nodes.push(new Node({navigator: this.props.navigator, onPress: this.props.onPressNode, index: n * 10 - 1}))
-		})
-		
-		
-		// ============  associate nodes -> hexagons and nodes -> edges  ============
-		this.nodes.map((n) => {
-			n.hexagons = this.hexagons.filter( (h) => {
-				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.9 ) ** 2
-			}) 
-			
-			n.edges = this.edges.filter( (h) => {
-				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.5 ) ** 2
-			})
-			
-			n.adjacentNodes = this.nodes.filter( (n2) => {
-				let d_sq = (n.coordinates.x - n2.coordinates.x ) ** 2 + (n.coordinates.y - n2.coordinates.y) ** 2
-				return (d_sq < ( 0.75 ) ** 2) && (d_sq > 0.1 ** 2)
-				
-			})
-		})
-		
-		// associate
-		this.hexagons.map((h) => {
-			h.nodes = this.nodes.filter( (n) => {
-				return (n.coordinates.x - h.coordinates.x ) ** 2 + (n.coordinates.y - h.coordinates.y) ** 2 < ( 0.9 ) ** 2
-			})
-		})
-				
+		b.map((n) => { this.nodeAttributes.push({index: n * 10 - 1}) })
+
 	}
+	
+	
+	nodesWithinRadius(refObj, expectedDistance ) {
+		return this.nodes.filter( (n2) => {
+			if (n2) {
+				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
+				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)					
+			} else {
+				return false
+			}
+			 
+		})
+	}
+	
+	edgesWithinRadius(refObj, expectedDistance ) {
+		return this.edges.filter( (n2) => {
+			if (n2) {				
+				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
+				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)	
+			} else {
+				return false
+			}
+		})
+	}
+	
+	hexagonsWithinRadius(refObj, expectedDistance ) {
+		return this.hexagons.filter( (n2) => {
+			if (n2) {				
+				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
+				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)	
+			} else {
+				return false 
+			}
+		})
+	}
+	
+	
 	
 	shuffle(array) {
 	    let counter = array.length;
@@ -145,9 +154,34 @@ class WorldMap extends Component {
 
 				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }} >
 					<View transform={[{scaleX: 0.3}, {scaleY: 0.3}]} style={{ position: "absolute"}}>
-						{this.hexagons.map((h) => h.render())}
-						{this.edges.map((n) => n.render())}
-						{this.nodes.map((n) => n.render())}
+						{this.hexagonAttributes.map( (attr) => 
+							<Hexagon key={`hexagon_${attr.index}`} 
+								ref={(e) => { this.hexagons.push(e) }}
+								highlight={ this.state.highlightNumber == attr.number }
+								nodesWithinRadius={ (x,r) => this.nodesWithinRadius(x,r) }
+								edgesWithinRadius={ (x,r) => this.edgesWithinRadius(x,r) }
+								hexagonsWithinRadius={ (x,r) => this.hexagonsWithinRadius(x,r) }
+								{...attr} />)}
+						
+						{this.edgeAttributes.map((attr) => 
+							<Edge key={`edge_${attr.index}`} 
+								ref={(e) => { this.edges.push(e) }}
+								nodesWithinRadius={ (x,r) => this.nodesWithinRadius(x,r) }
+								edgesWithinRadius={ (x,r) => this.edgesWithinRadius(x,r) }
+								hexagonsWithinRadius={ (x,r) => this.hexagonsWithinRadius(x,r) }
+								{...attr} />)}
+
+						{this.nodeAttributes.map((h) => 
+							<Node key={ h.index } 
+								ref={(e) => { this.nodes.push(e) }} 
+								nodesWithinRadius={ (x,r) => this.nodesWithinRadius(x,r) }
+								edgesWithinRadius={ (x,r) => this.edgesWithinRadius(x,r) }
+								hexagonsWithinRadius={ (x,r) => this.hexagonsWithinRadius(x,r) }
+								onPress={  this.props.onPressNode }
+								{...h}
+							/>
+						)}
+
 					</View>
 				</View>
 			</View>

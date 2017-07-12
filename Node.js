@@ -22,7 +22,6 @@ class Node extends Component{
 	constructor(props) {
 		super(props);
 
-		this.index = props.index
 		this.state = {
 			contents: this.props.contents, // 1 is a settlement and 2 is a city
 			ownedByUser: this.props.ownedByUser
@@ -30,9 +29,9 @@ class Node extends Component{
 		// index will be like 061 or -061
 		// 061 -> should be separated to 06 and 1
 		// -061 -> should be separated to -06 and 1
-		this.indexSign = this.index > 0 ? 1 : -1
-		this.indexTens = this.indexSign * Math.floor( Math.abs(this.index) / 10.0)
-		this.indexOnes = Math.abs(this.index) % 10.0
+		this.indexSign = this.props.index > 0 ? 1 : -1
+		this.indexTens = this.indexSign * Math.floor( Math.abs(this.props.index) / 10.0)
+		this.indexOnes = Math.abs(this.props.index) % 10.0
 		
 		this.rotation = {
 			0: 90,
@@ -65,6 +64,19 @@ class Node extends Component{
 		}
 	}
 	
+	get adjacentNodes() {
+		return this.props.nodesWithinRadius( this, 1 / Math.sqrt( 3 ) )
+	}
+	
+	get adjacentHexagons() {
+		return this.props.hexagonsWithinRadius( this, 1 / Math.sqrt( 3 ) )
+	}
+	
+	get adjacentEdges() {
+		return this.props.edgesWithinRadius( this, 0.5 / Math.sqrt( 3 ) )
+	}
+	
+	
 	displayContents() {
 		switch( this.state.contents ) {
 			case 1: 
@@ -79,39 +91,44 @@ class Node extends Component{
 	}
 	
 	
+	
 	shape() {
 		switch( this.state.contents ) {
 			case 1:
-				return <View transform={[
-					{translateX: (Globals.hexagonSpacing * this.coordinates.x)}, 
+				return <View key={ `node_${this.props.index}` } transform={[
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={styles.settlement}>
 				<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonInner), {backgroundColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
-		        <View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
-		      </View>
+			        <View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
+			      </View>
 				break;
 			case 2:
-				
-				return <View transform={[
-					{translateX: (Globals.hexagonSpacing * this.coordinates.x)}, 
+
+				return <View key={ `node_${this.props.index}` } transform={[
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={styles.city}>
 				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonInner), {backgroundColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
 				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
 				      </View>
+
+				
 				break;
 			default:
-				return <View transform={[
-					{translateX: (Globals.hexagonSpacing * this.coordinates.x)}, 
+				return <View key={ `node_${this.props.index}` } transform={[
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={this.styles.circle} />
+				
 		}
 	}
 	
 	
 	render() {
+		
 		return (
-			<TouchableOpacity key={`node_${ this.index }`} onPress={ () => this.props.onPress(this) }>
+			<TouchableOpacity key={`node_${ this.props.index }`} onPress={ () => this.props.onPress(this) }>
 				{ this.shape() }
 			</TouchableOpacity>
 		)

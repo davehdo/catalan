@@ -2,10 +2,10 @@
 
 import React, { Component } from 'react';
 import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View,
+	AppRegistry,
+	StyleSheet,
+	Text,
+	View,
 	TouchableOpacity,
 	Button
 } from 'react-native';
@@ -21,30 +21,27 @@ const UserAssetsShow = require("./UserAssetsShow.js")
 
 class GameHome extends Component {
 	constructor(props) {
-	  super(props);
-	  
-	  let signedInUser = new User({name: "House Lannister", color: "red"})
-	  this.state = {
-		  users: [new User({name: "House Tyrell", color: "teal"}), new User({name: "House Fray", color: "black"}), signedInUser],
-		  round: 0,
-		  signedInUser: signedInUser,
-		  turnOfUser: signedInUser,
-		  thisTurnRolled: undefined,
-		  phase: undefined,
-		  message: undefined
-		  
-	  };
-	  
-		
-  }
+		super(props);
 
-  goToNode(n) {
-  		this.props.navigator.push({
-  		  title: 'Node',
-  		  component: NodeShow,
-  		  passProps: {node: n, game: this}
-  		});
-  	}
+		let signedInUser = new User({name: "House Lannister", color: "red"})
+		this.state = {
+			users: [new User({name: "House Tyrell", color: "teal"}), new User({name: "House Fray", color: "black"}), signedInUser],
+			round: 0,
+			signedInUser: signedInUser,
+			turnOfUser: signedInUser,
+			thisTurnRolled: undefined,
+			phase: undefined,
+			message: undefined		  
+		};
+	}
+
+	goToNode(n) {
+		this.props.navigator.push({
+			title: 'Node',
+			component: NodeShow,
+			passProps: {node: n, game: this}
+		});
+	}
 	
 	rollDice() {
 		if (this.state.thisTurnRolled) {
@@ -53,10 +50,7 @@ class GameHome extends Component {
 			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
 			this.worldMap.setState({highlightNumber: newRoll})
 			this.setState({thisTurnRolled: newRoll})
-
-
-		}
-			
+		}			
 	}
 	
 	endTurn() {
@@ -98,10 +92,8 @@ class GameHome extends Component {
 			
 		 				
 	 		<WorldMap ref={(e) => { this.worldMap = e }} 
-				navigator={ this.props.navigator }
-	 			turnOfUser={ this.state.turnOfUser }
 	 			highlightNumber={ this.state.thisTurnRolled }
-	 			onPressNode={ this.goToNode }
+	 			onPressNode={ (x) => {this.goToNode(x)} }
 	 			/>
 			
 			
