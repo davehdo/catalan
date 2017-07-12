@@ -10,9 +10,9 @@ import {
 	TouchableOpacity
 } from 'react-native';
 
-const NodeShow = require('./NodeShow.js');
-const Node = require("./Node.js")
-const Edge = require("./Edge.js")
+// const NodeShow = require('./NodeShow.js');
+// const Node = require("./Node.js")
+// const Edge = require("./Edge.js")
 const Globals = require("./Globals.js")
 
 
@@ -22,7 +22,7 @@ class Hexagon extends Component {
 		super(props); // props includes highlight, number, resource, and index
 		
 		this.state = {
-			highlight: props.highlight
+			highlight: props.highlight || false 
 		}
 				
 		this.coordinates = Globals.hexagonCoordinates[ this.props.index ] || {x: 0, y: 0}

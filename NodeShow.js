@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
+const Edge = require('./Edge');
+const Node = require('./Node');
+const Hexagon = require('./Hexagon');
 const MapHeight = 260
 const UserAssetsShow = require("./UserAssetsShow.js")
 
@@ -18,7 +21,22 @@ const UserAssetsShow = require("./UserAssetsShow.js")
 class NodeShow extends Component {
 	constructor(props) {
 		super(props); // props include turnOfUser and node
-	  this.state = {message: undefined};
+	  this.state = {
+		  message: undefined,
+		  edges: this.props.node.adjacentEdges,
+		  hexagons: this.props.node.adjacentHexagons,
+		  nodes: [] 
+	  };
+	  
+
+	  this.state.hexagons.map((h) => {
+  		  h.adjacentNodes.map((n) => {
+  			  if (this.state.nodes.indexOf( n ) == -1) {
+  				  this.state.nodes.push(n)
+  			  }
+  		  })
+	  })
+
 	}
 	
 	commonObstacleToBuilding() {
@@ -54,8 +72,14 @@ class NodeShow extends Component {
 		// if none of my settlement pieces remain
 					
 		} else {
-			this.props.node.state.contents = 1
-			this.props.node.state.ownedByUser = this.props.game.state.turnOfUser
+			this.props.node.setState({
+				contents: 1,
+				ownedByUser: this.props.game.state.turnOfUser
+			}) 
+
+			
+			// this.props.node.state.contents = 1
+			// this.props.node.state.ownedByUser = this.props.game.state.turnOfUser
 			this.setState({message: "Settlement built!"})	// ownedByUser
 			
 		}
@@ -86,7 +110,10 @@ class NodeShow extends Component {
   render() {
 
 	//  	
-	// 
+	// 						
+
+						// 
+						// 
 	
     return (
 		<View style={styles.container}>
@@ -107,9 +134,9 @@ class NodeShow extends Component {
 						{translateX: -200 * this.props.node.coordinates.x }, 
 						{translateY: 200 * this.props.node.coordinates.y }]} style={{ position: "absolute"}}>		
 
-						{ this.props.node.adjacentHexagons.map((h) => h.render())}
-						{ this.props.node.adjacentEdges.map((h) => h.render())}
-						{ this.props.node.adjacentHexagons.map((h) => h.adjacentNodes.map((n) => n.render() ))}
+						{ this.state.hexagons.map((h) =>  <Hexagon key={`h_${h.props.index}` } { ...h.props } /> )}
+						{ this.state.edges.map((h) => <Edge key={`e_${h.props.index}`} {...h.props} />  )}
+						{ this.state.nodes.map((h) => <Node key={`n_${h.props.index}`} {...h.props} />  )}
 
 					</View>
 				</View>
