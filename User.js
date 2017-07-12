@@ -9,15 +9,26 @@ import {
 	TouchableOpacity
 } from 'react-native';
 
+const Globals = require("./Globals.js")
 
 
 class User extends Component {
 	constructor(props) {
 	  super(props);
+	  
+	  let resourceCount = {}
+	  Object.values(Globals.resources).map((v) => resourceCount[v] = Math.ceil( Math.random() * 10 ))
+	  
 	  this.state = {
 		  name: this.props.name,
-		  color: this.props.color
+		  color: this.props.color,
+		  resourceCount: resourceCount,
+		  nDeployedSettlements: 0,
+		  nDeployedCities: 0,
+		  nDeployedRoads: 0,
 	  };
+	  
+	  
 	}
 
   render() {

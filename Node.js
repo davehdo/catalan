@@ -10,50 +10,12 @@ import {
 	TouchableOpacity
 } from 'react-native';
 
+const Globals = require("./Globals.js")
 
-const NodeShow = require('./NodeShow.js');
+
+// const NodeShow = require('./NodeShow.js');
 
 const nodeDiameter = 30
-const hexagonSpacing = 200
-
-const hexagonCoordinates = {
-		18: {x: 0, y: 0}, 
-		14: {x: 1, y: 0}, 
-		13: {x: 0.5, y: 0.866025403784439}, 
-		12: {x: -0.5, y: 0.866025403784439}, 
-		17: {x: -1, y: 1.22514845490862E-16}, 
-		16: {x: -0.5, y: -0.866025403784438}, 
-		15: {x: 0.5, y: -0.866025403784439}, 
-		4: {x: 2, y: 0}, 
-		2: {x: 1, y: 1.73205080756888}, 
-		0: {x: -1, y: 1.73205080756888}, 
-		10: {x: -2, y: 2.45029690981724E-16}, 
-		8: {x: -1, y: -1.73205080756888}, 
-		6: {x: 1, y: -1.73205080756888}, 
-		3: {x: 1.5, y: 0.866025403784439}, 
-		1: {x: 3.33066907387547E-16, y: 1.73205080756888}, 
-		9: {x: -1.5, y: -0.866025403784438}, 
-		7: {x: -3.33066907387547E-16, y: -1.73205080756888}, 
-		5: {x: 1.5, y: -0.866025403784439}, 
-		11: {x: -1.5, y: 0.866025403784439}, 
-		"-18": {x: -1.5, y: 2.59807621135332}, 
-		"-17": {x: -0.499999999999999, y: 2.59807621135332}, 
-		"-16": {x: 0.500000000000001, y: 2.59807621135332}, 
-		"-1": {x: -2, y: 1.73205080756888}, 
-		"-2": {x: -2.5, y: 0.866025403784439}, 
-		"-3": {x: -3, y: 3.67544536472586E-16}, 
-		"-4": {x: -2.5, y: -0.866025403784438}, 
-		"-5": {x: -2, y: -1.73205080756888}, 
-		"-6": {x: -1.5, y: -2.59807621135332}, 
-		"-7": {x: -0.500000000000001, y: -2.59807621135332}, 
-		"-8": {x: 0.499999999999999, y: -2.59807621135332},
-		"-9": {x: 1.5, y: -2.59807621135332}, 
-		"-10": {x: 2, y: -1.73205080756888}, 
-		"-11": {x: 2.5, y: -0.866025403784439}, 
-		"-12": {x: 3, y: 0}, 
-	}
-		
-
 
 
 class Node extends Component{
@@ -61,9 +23,10 @@ class Node extends Component{
 		super(props);
 
 		this.index = props.index
-		this.contents = undefined // 1 is a settlement and 2 is a city
-		this.ownedByUser = undefined
-		
+		this.state = {
+			contents: this.props.contents, // 1 is a settlement and 2 is a city
+			ownedByUser: this.props.ownedByUser
+		}
 		// index will be like 061 or -061
 		// 061 -> should be separated to 06 and 1
 		// -061 -> should be separated to -06 and 1
@@ -76,9 +39,12 @@ class Node extends Component{
 			1: 30,
 		}[ this.indexOnes ]
 		
+		let coords = Globals.hexagonCoordinates[ this.indexTens ] || {x: 0, y: 0}
+		
+		// we don't assign hexagonCoordinates directly because we want it to be a clone
 		this.coordinates = {
-			x: hexagonCoordinates[ this.indexTens ].x || 0, 
-			y: hexagonCoordinates[ this.indexTens ].y || 0
+			x: coords.x || 0, 
+			y: coords.y || 0
 		}
 		
 		this.coordinates.x +=  1 / Math.sqrt(3) * Math.cos( this.rotation / 180 * 3.14159265359 )
@@ -100,7 +66,7 @@ class Node extends Component{
 	}
 	
 	displayContents() {
-		switch( this.contents ) {
+		switch( this.state.contents ) {
 			case 1: 
 				return "Settlement"
 				break;
@@ -114,29 +80,30 @@ class Node extends Component{
 	
 	
 	shape() {
-		switch( this.contents ) {
-			case 1: 
+		switch( this.state.contents ) {
+			case 1:
 				return <View transform={[
-					{translateX: (hexagonSpacing * this.coordinates.x)}, 
-					{translateY: -(hexagonSpacing * this.coordinates.y)}
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)}, 
+					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={styles.settlement}>
-				        <View style={styles.settlementHexagonInner} />
-				        <View style={styles.settlementHexagonBefore} />
-				      </View>
+				<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonInner), {backgroundColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
+		        <View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
+		      </View>
 				break;
 			case 2:
+				
 				return <View transform={[
-					{translateX: (hexagonSpacing * this.coordinates.x)}, 
-					{translateY: -(hexagonSpacing * this.coordinates.y)}
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)}, 
+					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={styles.city}>
-				        <View style={styles.cityHexagonInner} />
-				        <View style={styles.cityHexagonBefore} />
+				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonInner), {backgroundColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
+				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
 				      </View>
 				break;
 			default:
 				return <View transform={[
-					{translateX: (hexagonSpacing * this.coordinates.x)}, 
-					{translateY: -(hexagonSpacing * this.coordinates.y)}
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)}, 
+					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={this.styles.circle} />
 		}
 	}
@@ -144,13 +111,7 @@ class Node extends Component{
 	
 	render() {
 		return (
-			<TouchableOpacity key={`node_${ this.index }`} onPress={ () => {
-					this.props.navigator.push({
-					  title: 'Node',
-					  component: NodeShow,
-					  passProps: {node: this}
-					});
-				}}>
+			<TouchableOpacity key={`node_${ this.index }`} onPress={ () => this.props.onPress(this) }>
 				{ this.shape() }
 			</TouchableOpacity>
 		)
@@ -171,7 +132,7 @@ const styles = StyleSheet.create({
    settlementHexagonInner: {
      width: 100 / 100 * settlementWidth,
      height: 55 / 100 * settlementWidth,
-     backgroundColor: 'red'
+     backgroundColor: `red`
    },
    settlementHexagonBefore: {
      position: 'absolute',

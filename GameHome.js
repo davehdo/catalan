@@ -12,16 +12,13 @@ import {
 
 const WorldMap = require('./WorldMap');
 const NodeShow = require('./NodeShow');
+const Node = require('./Node');
 const User = require('./User.js');
+const Globals = require("./Globals.js")
+const UserAssetsShow = require("./UserAssetsShow.js")
 
-const Card = (props) => {
-	return <View style={{alignItems: "center"}}>
-				<View style={{ backgroundColor: "whitesmoke", padding: 7, margin: 4, borderRadius: 3 }}>
-					<View style={{ backgroundColor: props.color, height: 45, width: 30}}></View>
-		 		</View>
-				<Text>{ props.count }</Text>
-			</View>
-}
+
+
 class GameHome extends Component {
 	constructor(props) {
 	  super(props);
@@ -32,17 +29,42 @@ class GameHome extends Component {
 		  round: 0,
 		  signedInUser: signedInUser,
 		  turnOfUser: signedInUser,
-		  phase: undefined
+		  thisTurnRolled: undefined,
+		  phase: undefined,
+		  message: undefined
 		  
 	  };
-	}
+	  
+		
+  }
 
+  goToNode(n) {
+  		this.props.navigator.push({
+  		  title: 'Node',
+  		  component: NodeShow,
+  		  passProps: {node: n, game: this}
+  		});
+  	}
+	
+	rollDice() {
+		if (this.state.thisTurnRolled) {
+			this.setState({message: "Already rolled this turn"})
+		} else {
+			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
+			this.worldMap.setState({highlightNumber: newRoll})
+			this.setState({thisTurnRolled: newRoll})
+
+
+		}
+			
+	}
+	
 	endTurn() {
 		let currentIndex = this.state.users.indexOf( this.state.turnOfUser )
 		let newIndex = (currentIndex + 1 >= this.state.users.length) ? 0 : currentIndex + 1
 		let newRound = this.state.round + (currentIndex + 1 >= this.state.users.length ? 1 : 0)
 		
-		this.setState({turnOfUser: this.state.users[newIndex], round: newRound})
+		this.setState({turnOfUser: this.state.users[newIndex], round: newRound, thisTurnRolled: undefined})
 	}
 	
 	
@@ -56,12 +78,14 @@ class GameHome extends Component {
 			 	<View style={{ flex: 1 }}>
 		 { (this.state.turnOfUser == this.state.signedInUser ) ?
 		<Text style={styles.description}>
-			 { this.state.turnOfUser.state.name }, its your turn{ "\n" }
-			 Tap a spot on the map to build
+			 { this.state.turnOfUser.state.name }{ this.state.thisTurnRolled ? ` rolled ${this.state.thisTurnRolled}` : ", its your turn"}{ "\n" }
+			 { this.state.thisTurnRolled ? `Tap spot on the map to build` : "Roll dice"}
+			 { this.state.message ? `\n${this.state.message}` : ""}
 		</Text>
 			 :
 		<Text style={styles.description}>
-			 Waiting on { this.state.turnOfUser.state.name }
+			 Waiting on { this.state.turnOfUser.state.name }{ "\n" }
+			 { this.state.thisTurnRolled ? `Rolled ${this.state.thisTurnRolled}` : "Has not rolled"}
 		</Text>
 		 
 		 }
@@ -71,19 +95,18 @@ class GameHome extends Component {
 						 
 			 	</View>
 			</View>
-		
-			<WorldMap navigator={this.props.navigator}/>
-		 
-			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
-				 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }}>
-						<Card count={3} color="forestgreen"/>
-						<Card count={1} color="gold"/>
-						<Card count={2} color="darkred"/>
-						<Card count={1} color="silver"/>
-						<Card count={1} color="lightgreen"/>
-				 </View>
-			</View>
-						 
+			
+		 				
+	 		<WorldMap ref={(e) => { this.worldMap = e }} 
+				navigator={ this.props.navigator }
+	 			turnOfUser={ this.state.turnOfUser }
+	 			highlightNumber={ this.state.thisTurnRolled }
+	 			onPressNode={ this.goToNode }
+	 			/>
+			
+			
+		 	<UserAssetsShow user={ this.state.signedInUser }/>
+
  			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
 	 				 <Button
 	 				   onPress={() => this.endTurn()}
@@ -93,7 +116,7 @@ class GameHome extends Component {
 	 				 />
 					
 	 				 <Button
-	 				   onPress={() => this.buildCity()}
+	 				   onPress={() => this.rollDice()}
 	 				   title="Roll"
 	 				   color="#841584"
 	 				   accessibilityLabel="Learn more about this purple button"
@@ -122,7 +145,8 @@ var styles = StyleSheet.create({
 	 flex: 1,
     // padding: 10,
     marginTop: 65,
-    alignItems: 'center'
+    alignItems: 'center',
+	  backgroundColor: "tan"
   }
 });
 

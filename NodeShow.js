@@ -11,23 +11,75 @@ import {
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
-const MapHeight = 300
+const MapHeight = 260
+const UserAssetsShow = require("./UserAssetsShow.js")
+
 
 class NodeShow extends Component {
 	constructor(props) {
-	  super(props);
-	  this.state = { };
+		super(props); // props include turnOfUser and node
+	  this.state = {message: undefined};
+	}
+	
+	commonObstacleToBuilding() {
+		// if its not your turn
+		if (false) {
+			return true
+		} else if (false) {
+		// if you have not rolled yet
+			return true
+		} else if (this.props.node.state.contents >= 1 && this.props.node.state.ownedByUser != this.props.game.state.turnOfUser) {
+		// if already a building there
+			this.setState({message: "Cannot build on someone else's property!"})
+		} else if (this.props.node.adjacentNodes.filter((n) => n.state.contents ).length > 0) {
+		// if too close to others
+			this.setState({message: "Cannot build too close to others!"})
+			return true
+		} else if (false) {
+		// if not affordable 
+			return true
+		} else {
+			return false
+		}
 	}
 	
 	buildSettlement() {
-		this.props.node.contents = 1
-			// ownedByUser
+		// if its not your turn
+		if (this.commonObstacleToBuilding()) {
+			//
+		} else if (this.props.node.state.contents) {
+		// if already a building there
+			this.setState({message: "Cannot build where another building already exists!"})
+		} else if (false) {
+		// if none of my settlement pieces remain
+					
+		} else {
+			this.props.node.state.contents = 1
+			this.props.node.state.ownedByUser = this.props.game.state.turnOfUser
+			this.setState({message: "Settlement built!"})	// ownedByUser
+			
+		}
 		
 	}
 	
 	buildCity() {
-		this.props.node.contents = 2
-			// ownedByUser
+		// if its not your turn
+		if (this.commonObstacleToBuilding()) {
+			//
+		} else if (this.props.node.state.contents >= 2) {
+		// if already a building there
+			this.setState({message: "Cannot build where another city already exists!"})
+		} else if (this.props.node.state.contents < 1) {
+		// if already a building there
+			this.setState({message: "Can only build a city on top of existing settlement!"})
+		} else if (false) {
+		// if none of my city pieces remain
+					
+		} else {
+			this.props.node.state.contents = 2
+			this.props.node.state.ownedByUser = this.props.game.state.turnOfUser
+			this.setState({message: "City built!"})	// ownedByUser
+		}
 		
 	}
 	
@@ -36,11 +88,15 @@ class NodeShow extends Component {
     return (
 		<View style={styles.container}>
 			<Text style={styles.description}>
-				{ this.props.node.displayContents() } { this.props.node.index }
+				{ this.props.node.displayContents() } { this.props.node.index }{"\n"}
+				{ this.props.node.state.ownedByUser ? `Owned by ${this.props.node.state.ownedByUser.state.name}` : ""}
+			</Text>
+			<Text style={styles.description}>
+				{ this.state.message }
 			</Text>
 
 
-			<View style={{ backgroundColor: "whitesmoke", flexDirection: "row"}}>
+			<View style={{ backgroundColor: "whitesmoke", margin: 30, flexDirection: "row"}}>
 				<View style={{flex: 1 }}></View>
 
 				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }}>
@@ -56,7 +112,9 @@ class NodeShow extends Component {
 				</View>
 			</View>
 
-			<View style={{ flexDirection: "column", justifyContent: "flex-start"}}>
+		 	<UserAssetsShow user={ this.props.game.state.signedInUser }/>
+
+			<View style={{ flexDirection: "row", justifyContent: "flex-start"}}>
 				 <Button
 				   onPress={() => this.buildSettlement()}
 				   title="Build a settlement"
@@ -94,7 +152,7 @@ var styles = StyleSheet.create({
   },
   container: {
 	  // flex: 1,
-    padding: 30,
+    padding: 0,
     marginTop: 65,
     alignItems: 'center'
   }
