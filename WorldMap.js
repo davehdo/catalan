@@ -22,70 +22,46 @@ class WorldMap extends Component {
 		
 	constructor(props) {
 		super(props);
-		// props include highlightNumber and onPressNode
-		
-		this.state = {
-			highlightNumber: props.highlightNumber
-		}
+		// props include 
+		// highlightNumber and
+		// onPressNode
 		
 		// by convention, map is flat on top
 		// numbering is outside-in with a spiral
 		// starting top row, left most hexagon, and moving clockwise
 		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
 		let resources = this.shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)
+
+		this.state = {
+			highlightNumber: props ? props.highlightNumber : undefined,
+			hexagonProperties: resources.map((r,i) => { 
+				return({ 
+					index: i, 
+					resource: r,
+					number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), 
+				})
+			}),
+			nodeContents: {},
+			edgeContents: {}
+		}
+		
+		
+		// ==========================  produce the hexagon objects  ==========================
+		// goal is that whats above this point contains enough information to completely 
+		// configure the entire map, and everything below is simply for drawing
+		
 		let num
 		
-		let siblingRefFunctions = {
+		this.siblingRefFunctions = {
 			nodesWithinRadius: (h,r) => this.nodesWithinRadius(h,r),
 			edgesWithinRadius: (h,r) => this.edgesWithinRadius(h,r),
 			hexagonsWithinRadius: (h,r) => this.hexagonsWithinRadius(h,r)				
 		}
-		
-		this.hexagons = resources.map((r,i) => {
-			return new Hexagon({index: i, 
-				number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), 
-				resource: r,
-				...siblingRefFunctions
-			})  // 19
-		})
-		
-		// ==========================  produce the edges  ==========================
-		this.edges = []
-		
-		this.hexagons.map((h) => {
-			this.edges.push(new Edge({index: h.props.index * 10, ...siblingRefFunctions}))
-			this.edges.push(new Edge({index: h.props.index * 10 + 1, ...siblingRefFunctions}))
-			this.edges.push(new Edge({index: h.props.index * 10 + 2, ...siblingRefFunctions}))
-		})
-
-		let edgesA = [-1, -2, -16, -17, -18]
-		edgesA.map((n) => { this.edges.push(new Edge({index: n * 10 - 2, ...siblingRefFunctions})) })
-
-		let edgesB = [-1, -2, -3, -4, -5]
-		edgesB.map((n) => { this.edges.push(new Edge({index: n * 10 - 1, ...siblingRefFunctions})) })
-
-		let edgesC = [-4, -5, -6, -7, -8]
-		edgesC.map((n) => { this.edges.push(new Edge({index: n * 10, ...siblingRefFunctions })) })
-
-		// ==========================  produce the nodes  ==========================
-		this.nodes = []
-		
-		this.hexagons.map((h) => {
-			this.nodes.push( new Node({index: h.props.index * 10, ...siblingRefFunctions }) )
-			this.nodes.push( new Node({index: h.props.index * 10 + 1, ...siblingRefFunctions }) )
-		})				
-
-		let a = [-4, -5, -6, -7, -8, -9, -10, -11]
-		a.map((n) => { this.nodes.push(new Node({ index: n * 10, ...siblingRefFunctions}) )})
-
-		let b = [-1, -2, -3, -4, -5, -6, -7, -8]
-		b.map((n) => { this.nodes.push(new Node({index: n * 10 - 1, ...siblingRefFunctions}) )})
-
 	}
 	
 	
 	nodesWithinRadius(refObj, expectedDistance ) {
-		return this.nodes.filter( (n2) => {
+		return [].filter( (n2) => {
 			if (n2) {
 				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
 				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)					
@@ -97,7 +73,7 @@ class WorldMap extends Component {
 	}
 	
 	edgesWithinRadius(refObj, expectedDistance ) {
-		return this.edges.filter( (n2) => {
+		return [].filter( (n2) => {
 			if (n2) {				
 				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
 				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)	
@@ -108,7 +84,7 @@ class WorldMap extends Component {
 	}
 	
 	hexagonsWithinRadius(refObj, expectedDistance ) {
-		return this.hexagons.filter( (n2) => {
+		return [].filter( (n2) => {
 			if (n2) {				
 				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
 				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)	
@@ -149,6 +125,20 @@ class WorldMap extends Component {
 	}
 
 	render() {
+		let edgeIds = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 
+			150, 160, 170, 180, 1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101, 111, 121, 
+			131, 141, 151, 161, 171, 181, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 
+			112, 122, 132, 142, 152, 162, 172, 182,   -40, -50, -60, -70, -80,
+			-11, -21, -31, -41, -51,   -12, -22, -162, -172, -182]
+			
+
+		// ==========================  produce the nodes  ==========================
+		
+		let nodeIds = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 
+			150, 160, 170, 180, 1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101, 111, 121, 
+			131, 141, 151, 161, 171, 181,   -40, -50, -60, -70, -80, -90, -100, -110, 
+			-11, -21, -31, -41, -51, -61, -71, -81]
+		
 		
 		return(
 			<View style={{ backgroundColor: "lightblue", flexDirection: "row"  }}>
@@ -156,19 +146,24 @@ class WorldMap extends Component {
 
 				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }} >
 					<View transform={[{scaleX: 0.3}, {scaleY: 0.3}]} style={{ position: "absolute"}}>
-					{this.hexagons.map( (h) => 
-						<Hexagon key={`hexagon_${h.props.index}`} 
-							highlight={ this.state.highlightNumber == h.props.number }
-							{...h.props} />)}
 
-					{this.edges.map((h) => 
-						<Edge key={`edge_${h.props.index}`} 
-							{...h.props} />)}
+					{ this.state.hexagonProperties.map((e) => 
+						<Hexagon key={`hex_${e.index}`} 
+							highlight={ this.state.highlightNumber == e.number }
+							{...e}
+							{...this.siblingRefFunctions} />
+					)}
 
-					{this.nodes.map((h) => 
-						<Node key={ h.props.index } 
-							onPress={  this.props.onPressNode }
-							{...h.props} /> )}			
+					{ edgeIds.map((h) => 
+						<Edge key={`edge_${h}`}
+							index={h}
+							{...this.siblingRefFunctions} />)}
+
+					{ nodeIds.map((h) => 
+						<Node key={ h } index={ h }
+							onPress={ this.props ? this.props.onPressNode : () => {} }
+							{...this.siblingRefFunctions} /> )}			
+
 					</View>
 				</View>
 			</View>

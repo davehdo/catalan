@@ -20,11 +20,7 @@ const Globals = require("./Globals.js")
 class Hexagon extends Component {
 	constructor(props) {
 		super(props); // props includes highlight, number, resource, and index
-		
-		this.state = {
-			highlight: props.highlight || false 
-		}
-				
+
 		this.coordinates = Globals.hexagonCoordinates[ this.props.index ] || {x: 0, y: 0}
 		
 		let sideToSideWidth = Globals.hexagonSpacing 
@@ -150,7 +146,7 @@ class Hexagon extends Component {
 				<View style={this.styles.hexagonBefore} />
 				<View style={this.styles.hexagonAfter} />
 			 <View style={{ position: "absolute"}}>
-				<Text style={ this.state.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
+				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
 			 </View>
 	      </View>
 	    )

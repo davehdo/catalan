@@ -12,7 +12,7 @@ import {
 
 const WorldMap = require('./WorldMap');
 const NodeShow = require('./NodeShow');
-const Node = require('./Node');
+// const Node = require('./Node');
 const User = require('./User.js');
 const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
@@ -23,15 +23,17 @@ class GameHome extends Component {
 	constructor(props) {
 		super(props);
 
-		let signedInUser = new User({name: "House Lannister", color: "red"})
+		// props includes
+		// worldMap
+		// signedInUser
+		// users
+		
 		this.state = {
-			users: [new User({name: "House Tyrell", color: "teal"}), new User({name: "House Fray", color: "black"}), signedInUser],
 			round: 0,
-			signedInUser: signedInUser,
-			turnOfUser: signedInUser,
+			turnOfUser: this.props.signedInUser,
 			thisTurnRolled: undefined,
 			phase: undefined,
-			message: undefined		  
+			message: undefined // not quite relevant to the nonactive users--personalize this?
 		};
 	}
 
@@ -39,7 +41,7 @@ class GameHome extends Component {
 		this.props.navigator.push({
 			title: 'Node',
 			component: NodeShow,
-			passProps: {node: n, game: this}
+			passProps: {node: n, gameProps: this.props, gameState: this.state}
 		});
 	}
 	
@@ -48,17 +50,17 @@ class GameHome extends Component {
 			this.setState({message: "Already rolled this turn"})
 		} else {
 			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
-			this.worldMap.setState({highlightNumber: newRoll})
+			this.props.worldMap.highlightNumber = newRoll
 			this.setState({thisTurnRolled: newRoll})
 		}			
 	}
 	
 	endTurn() {
-		let currentIndex = this.state.users.indexOf( this.state.turnOfUser )
-		let newIndex = (currentIndex + 1 >= this.state.users.length) ? 0 : currentIndex + 1
-		let newRound = this.state.round + (currentIndex + 1 >= this.state.users.length ? 1 : 0)
+		let currentIndex = this.props.users.indexOf( this.state.turnOfUser )
+		let newIndex = (currentIndex + 1 >= this.props.users.length) ? 0 : currentIndex + 1
+		let newRound = this.state.round + (currentIndex + 1 >= this.props.users.length ? 1 : 0)
 		
-		this.setState({turnOfUser: this.state.users[newIndex], round: newRound, thisTurnRolled: undefined})
+		this.setState({turnOfUser: this.props.users[newIndex], round: newRound, thisTurnRolled: undefined})
 	}
 	
 	
@@ -90,14 +92,13 @@ class GameHome extends Component {
 			 	</View>
 			</View>
 			
-		 				
-	 		<WorldMap ref={(e) => { this.worldMap = e }} 
+			<WorldMap 
 	 			highlightNumber={ this.state.thisTurnRolled }
 	 			onPressNode={ (x) => {this.goToNode(x)} }
-	 			/>
+	 			{...this.props.worldMap.props} />
 			
 			
-		 	<UserAssetsShow user={ this.state.signedInUser }/>
+		 	<UserAssetsShow user={ this.props.signedInUser }/>
 
  			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
 	 				 <Button

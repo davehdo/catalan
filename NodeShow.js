@@ -49,6 +49,7 @@ class NodeShow extends Component {
 		} else if (this.props.node.state.contents >= 1 && this.props.node.state.ownedByUser != this.props.game.state.turnOfUser) {
 		// if already a building there
 			this.setState({message: "Cannot build on someone else's property!"})
+			return true
 		} else if (this.props.node.adjacentNodes.filter((n) => n && n.state.contents ).length > 0) {
 		// if too close to others
 			this.setState({message: "Cannot build too close to others!"})
@@ -74,7 +75,7 @@ class NodeShow extends Component {
 		} else {
 			this.props.node.setState({
 				contents: 1,
-				ownedByUser: this.props.game.state.turnOfUser
+				ownedByUser: this.props.gameState.turnOfUser
 			}) 
 
 			
@@ -109,12 +110,6 @@ class NodeShow extends Component {
 	
   render() {
 
-	//  	
-	// 						
-
-						// 
-						// 
-	
     return (
 		<View style={styles.container}>
 			<Text style={styles.description}>
@@ -136,13 +131,14 @@ class NodeShow extends Component {
 
 						{ this.state.hexagons.map((h) =>  <Hexagon key={`h_${h.props.index}` } { ...h.props } /> )}
 						{ this.state.edges.map((h) => <Edge key={`e_${h.props.index}`} {...h.props} />  )}
-						{ this.state.nodes.map((h) => <Node key={`n_${h.props.index}`} {...h.props} />  )}
+						{ this.state.nodes.map((h) => <Node key={`e_${h.props.index}`} onPress={  this.props.onPress } {...h.props} /> )}
+						{ this.props.node.render() }
 
 					</View>
 				</View>
 			</View>
 
-		 	<UserAssetsShow user={ this.props.game.state.signedInUser }/>
+		 	<UserAssetsShow user={ this.props.gameProps.signedInUser }/>
 
 			<View style={{ flexDirection: "row", justifyContent: "flex-start"}}>
 				 <Button
