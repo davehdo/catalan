@@ -48,20 +48,20 @@ const game = ( state, action ) => {
 			players: players(), 
 			round: 0, 
 			turn: 0,
-			lastRoll: undefined
+			thisTurnRolled: undefined
 		}
 	switch( action.type ) {
 		case "END_TURN":
 			return Object.assign(
 				{}, 
 				state, 
-				(state.turn >= state.players.length) ? {turn: 0, round: state.round + 1} : { turn: state.turn + 1}
+				(state.turn >= state.players.length - 1) ? {turn: 0, round: state.round + 1, thisTurnRolled: undefined} : { turn: state.turn + 1, thisTurnRolled: undefined}
 			);
 		case "ROLL":
 			return Object.assign(
 				{}, 
 				state, 
-				{ lastRoll: action.rollValue }
+				{ thisTurnRolled: action.rollValue }
 			);
 		default:
 			return state;

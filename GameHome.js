@@ -18,7 +18,6 @@ const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
 
 
-
 class GameHome extends Component {
 	constructor(props) {
 		super(props);
@@ -29,10 +28,6 @@ class GameHome extends Component {
 		// users
 		
 		this.state = {
-			round: 0,
-			turnOfUser: this.props.signedInUser,
-			thisTurnRolled: undefined,
-			phase: undefined,
 			message: undefined // not quite relevant to the nonactive users--personalize this?
 		};
 		
@@ -55,59 +50,66 @@ class GameHome extends Component {
 		this.props.navigator.push({
 			title: 'Node',
 			component: NodeShow,
-			passProps: {node: n, gameProps: this.props, gameState: this.state}
+			passProps: {node: n }
 		});
 	}
 	
 	rollDice() {
-		if (this.state.thisTurnRolled) {
+		if (this.context.store.getState().game.thisTurnRolled) {
 			this.setState({message: "Already rolled this turn"})
 		} else {
 			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
-			this.props.worldMap.highlightNumber = newRoll
+			// this.props.worldMap.highlightNumber = newRoll
+			this.context.store.dispatch({ type: "ROLL", rollValue: newRoll })
 			this.setState({thisTurnRolled: newRoll})
 		}			
 	}
 	
 	endTurn() {
-		let currentIndex = this.props.users.indexOf( this.state.turnOfUser )
-		let newIndex = (currentIndex + 1 >= this.props.users.length) ? 0 : currentIndex + 1
-		let newRound = this.state.round + (currentIndex + 1 >= this.props.users.length ? 1 : 0)
-		
-		this.setState({turnOfUser: this.props.users[newIndex], round: newRound, thisTurnRolled: undefined})
+		if (this.context.store.getState().game.thisTurnRolled) {
+			this.context.store.dispatch({ type: "END_TURN" })
+		} else {
+			this.setState({message: "Must roll first"})
+		}			
 	}
 	
 	
   render() {
+	  let state = this.context.store.getState()
+	  let turnOfUser = state.game.players[ state.game.turn ]
+	  
     return (
 		<View style={styles.container}>
         
 			<View style={{ flexDirection: "row", justifyContent: "flex-start", padding: 10, backgroundColor: "tan" }}>
-			 	<View style={{ backgroundColor: this.state.turnOfUser.state.color, height: 50, width: 50 }}>
-			 	</View>
+			 	<View style={{ backgroundColor: turnOfUser.color, height: 50, width: 50 }} />
+
 			 	<View style={{ flex: 1 }}>
-		 { (this.state.turnOfUser == this.state.signedInUser ) ?
-		<Text style={styles.description}>
-			 { this.state.turnOfUser.state.name }{ this.state.thisTurnRolled ? ` rolled ${this.state.thisTurnRolled}` : ", its your turn"}{ "\n" }
-			 { this.state.thisTurnRolled ? `Tap spot on the map to build` : "Roll dice"}
-			 { this.state.message ? `\n${this.state.message}` : ""}
-		</Text>
-			 :
-		<Text style={styles.description}>
-			 Waiting on { this.state.turnOfUser.state.name }{ "\n" }
-			 { this.state.thisTurnRolled ? `Rolled ${this.state.thisTurnRolled}` : "Has not rolled"}
-		</Text>
+			 		{ 
+						( turnOfUser == this.state.signedInUser ) ?
+					<Text style={styles.description}>
+						 { turnOfUser.name }{ state.game.thisTurnRolled ? ` rolled ${ state.game.thisTurnRolled}` : ", its your turn"}{ "\n" }
+						 { state.game.thisTurnRolled ? `Tap spot on the map to build` : "Roll dice"}
+						 
+					</Text>
+						 :
+					<Text style={styles.description}>
+						 
+						 Waiting on { turnOfUser.name }{ "\n" }
+						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled }` : "Has not rolled"}
+					</Text>
 		 
-		 }
+		 			}
+					<Text style={styles.message}>{ this.state.message ? `\n${this.state.message}` : ""}</Text>
 					<Text style={ styles.smallStats }>
-						 Round { this.context.store.getState().round }
+						 Round { state.game.round }
 					</Text>
 						 
 			 	</View>
 			</View>
 			
 			<WorldMap 
-	 			highlightNumber={ this.state.thisTurnRolled }
+	 			highlightNumber={ state.game.thisTurnRolled }
 	 			onPressNode={ (x) => {this.goToNode(x)} }
 	 			{...this.props.worldMap.props} />
 			
@@ -116,14 +118,14 @@ class GameHome extends Component {
 
  			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
 	 				 <Button
-	 				   onPress={() => this.context.store.dispatch({ type: "END_TURN" })}
+	 				   onPress={() => this.endTurn()}
 	 				   title="End my turn"
 	 				   color="#841584"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 					
 	 				 <Button
-	 				   onPress={() => this.rollDice()}
+	 				   onPress={ () => this.rollDice() }
 	 				   title="Roll"
 	 				   color="#841584"
 	 				   accessibilityLabel="Learn more about this purple button"
@@ -142,13 +144,18 @@ GameHome.contextTypes = {
 
 var styles = StyleSheet.create({
    description: {
-     marginBottom: 20,
-     fontSize: 18,
+     fontSize: 16,
      textAlign: 'center',
      color: '#656565'
    },
+   message: {
+
+     fontSize: 16,
+     textAlign: 'center',
+     color: 'blue'
+   },
    smallStats: {
-     marginBottom: 20,
+
      fontSize: 12,
      textAlign: 'center',
      color: '#656565'
