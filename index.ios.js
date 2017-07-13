@@ -9,8 +9,8 @@ import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,
-  Text,
-  View,
+  // Text,
+  // View,
 	NavigatorIOS
 } from 'react-native';
 
@@ -39,7 +39,9 @@ const GameHome = require('./GameHome');
 const WorldMap = require('./WorldMap');
 const User = require('./User.js');
 
-
+store.subscribe(() =>
+	console.log(store.getState())
+)
 
 export default class Catalan extends Component {
 	constructor() {
@@ -60,7 +62,7 @@ export default class Catalan extends Component {
 				<NavigatorIOS
 				style={styles.container}
 				initialRoute={{
-				 title: 'Catalan',
+				 title: `Catalan`,
 				 component: GameHome,
 				  passProps: {worldMap: new WorldMap(), signedInUser: this.signedInUser, users: this.users}
 				}}/>

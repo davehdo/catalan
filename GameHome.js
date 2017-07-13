@@ -35,8 +35,22 @@ class GameHome extends Component {
 			phase: undefined,
 			message: undefined // not quite relevant to the nonactive users--personalize this?
 		};
+		
+		// this.context.store.subscribe( this.render )
+		
 	}
 
+	componentDidMount() {
+		const { store } = this.context
+		this.unsubscribe = store.subscribe(() =>
+			this.forceUpdate()
+		)
+	}
+	
+	componentWillUnmount() {
+			this.unsubscribe()
+	}
+	
 	goToNode(n) {
 		this.props.navigator.push({
 			title: 'Node',
@@ -86,7 +100,7 @@ class GameHome extends Component {
 		 
 		 }
 					<Text style={ styles.smallStats }>
-						 Round { this.state.round }
+						 Round { this.context.store.getState().round }
 					</Text>
 						 
 			 	</View>
@@ -102,7 +116,7 @@ class GameHome extends Component {
 
  			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
 	 				 <Button
-	 				   onPress={() => this.endTurn()}
+	 				   onPress={() => this.context.store.dispatch({ type: "END_TURN" })}
 	 				   title="End my turn"
 	 				   color="#841584"
 	 				   accessibilityLabel="Learn more about this purple button"
@@ -119,6 +133,11 @@ class GameHome extends Component {
       </View>
     );
   }
+}
+
+// allows us to access store as this.context.store
+GameHome.contextTypes = {
+	store: React.PropTypes.object
 }
 
 var styles = StyleSheet.create({

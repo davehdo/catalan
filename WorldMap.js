@@ -57,6 +57,7 @@ class WorldMap extends Component {
 			edgesWithinRadius: (h,r) => this.edgesWithinRadius(h,r),
 			hexagonsWithinRadius: (h,r) => this.hexagonsWithinRadius(h,r)				
 		}
+		
 	}
 	
 	
