@@ -56,8 +56,9 @@ class GameHome extends Component {
 		if (edge && edge.road )
 			return this.setState({message: "There is already a road there"})
 			
-		if (edge.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0)
-			warning = "Warning: no adjacent road"
+		if (edge.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0 &&
+				edge.adjacentNodes().filter((e) => e.buildingType && e.userId == userId).length == 0)
+			return this.setState({message: "Warning: no adjacent road/building"})
 			
 		// cannot build through someones building
 			
@@ -83,29 +84,17 @@ class GameHome extends Component {
 			return this.setState({message: "Someone else has already built here"})
 		if (node && node.buildingType == 2)
 			return this.setState({message: "There is already a city here"})
-
 		if (node.adjacentNodes().filter((n) => n.buildingType).length > 0)
 			return this.setState({message: "Too close to other buildings"})
-
 		if (node.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0)
 			warning = "Warning: theres no adjacent road" 
 		// see if any one owner (thats no the building user) owns 2 or more nodes
-		let counts = []
-		let dupFound = false 
-		let otherOwnerIds = node.adjacentEdges()
-			.filter((e) => e.road && e.userId != userId)
-			.map((e) => e.userId)
-
-		otherOwnerIds.map((id) => {
-			if (counts.indexOf(id) == -1) {counts.push(id)} else {dupFound = true}
-		})
-		if (dupFound)
+		if ( node.surroundedByUser() != undefined && node.surroundedByUser() != userId)
 			return this.setState({message: "Cannot build in the middle of someone else's road"})
-
+			
 			
 		if (node && node.buildingType == 1)	{
 			// upgrade settlement to city
-
 			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ORE: -2, WHEAT: -3})
 		} else {
@@ -145,18 +134,30 @@ class GameHome extends Component {
 
 	nodeAll() {
 		let nodeContents = this.context.store.getState().map.nodeContents
-		return Globals.nodes.map((h) => Object.assign({
-			adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
-			adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
-		}, h, nodeContents[h.index]))
+		
+		return Globals.nodes.map((h) => {
+			const associationMethods = {
+					adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
+					adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
+			}
+			return Object.assign(associationMethods, {
+				surroundedByUser: () => {
+					let counts = []
+					let dupFound = undefined 
+					let ownerIds = associationMethods.adjacentEdges()
+						.filter((e) => e.road)
+						.map((e) => e.userId)
+
+					ownerIds.map((id) => {
+						if (counts.indexOf(id) == -1) {counts.push(id)} else {dupFound = id}
+					})
+					return dupFound
+				}
+			}, h, nodeContents[h.index])
+		})
 	}
 
 
-	userWithTurn() {
-		let state = this.context.store.getState()
-		return state.game.players[state.game.turn]
-	}
-	
 	rollDice() {
 		if (this.context.store.getState().game.thisTurnRolled) {
 			this.setState({message: "Already rolled this turn"})
@@ -199,8 +200,24 @@ class GameHome extends Component {
 	}
 	
 	signedInUser() {
-		return Object.assign({}, this.context.store.getState().game.players.filter((e) => e.id == 0)[0])
+		let signedInId = 0 // this is temporary
+		
+		let state = this.context.store.getState()
+		
+		return Object.assign({
+			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == signedInId && v.buildingType == 1).length,
+			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == signedInId && v.buildingType == 2).length,
+			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == signedInId && v.road).length
+		}, this.context.store.getState().game.players.filter((e) => e.id == signedInId)[0])
 	}  
+
+	userWithTurn() {
+		let state = this.context.store.getState()
+		return Object.assign({
+		}, state.game.players[state.game.turn])
+	}
+	
+
 	
   render() {
 	  let state = this.context.store.getState()
