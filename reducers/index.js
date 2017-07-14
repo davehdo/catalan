@@ -10,7 +10,7 @@
 // ROLL
 // BUILD
 // { type: "BUILD_EDGE", userId: _, edgeId: _ }
-// { type: "BUILD_NODE", userId: _, edgeId: _ }
+// { type: "BUILD_NODE", userId: _, nodeId: _ }
 
 const Globals = require("../Globals.js")
 
@@ -55,11 +55,15 @@ const players = ( state, action) => {
 		let houses = ["House Stark", "House Lannister", "House Tyrell"]
 		let colors = ["black", "teal", "red"]
 		let lastId = 0
+		let resourceCount = {}
+		Object.values(Globals.resources).map((v) => resourceCount[v] = Math.ceil( Math.random() * 10 ))
+		
 		return houses.map((h) => {
 			return({
 				id: lastId++,
 				name: h,
-				color: colors.shift()
+				color: colors.shift(),
+				resourceCount
 			})
 		})		
 	}
@@ -103,7 +107,8 @@ const map = (state, action) => {
 			}
 		case "BUILD_NODE":
 			let nodeObj = {}
-			nodeObj[ action.nodeId ] = { buildingType: 1, userId: action.userId }
+			let priorBuildingType = state.nodeContents[ action.nodeId ] ? state.nodeContents[ action.nodeId ].buildingType : 0
+			nodeObj[ action.nodeId ] = { buildingType: priorBuildingType >= 2 ? 2 : priorBuildingType + 1, userId: action.userId }
 			
 			return {
 				hexagonContents: state.hexagonContents,

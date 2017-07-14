@@ -141,7 +141,6 @@ class GameHome extends Component {
 // allows us to access store as this.context.store
 GameHome.contextTypes = {
 	store: React.PropTypes.object,
-	signedInUser: React.PropTypes.object
 }
 
 var styles = StyleSheet.create({
