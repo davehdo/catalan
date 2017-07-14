@@ -22,13 +22,9 @@ class GameHome extends Component {
 	constructor(props) {
 		super(props);
 
-		
 		this.state = {
 			message: undefined // not quite relevant to the nonactive users--personalize this?
-		};
-		
-		// this.context.store.subscribe( this.render )
-		
+		};		
 	}
 
 	componentDidMount() {
@@ -39,7 +35,7 @@ class GameHome extends Component {
 	}
 	
 	componentWillUnmount() {
-			this.unsubscribe()
+		this.unsubscribe()
 	}
 	
 
@@ -71,7 +67,6 @@ class GameHome extends Component {
 	}
 
 	nodeLacksNeighbors( nodeId ) {
-		
 		let nodeCoords = Globals.nodes.filter((e) => e.index == nodeId)[0]
 		let nodeContents = this.context.store.getState().map.nodeContents
 		
@@ -79,7 +74,6 @@ class GameHome extends Component {
 	}
 	
 	buildNode( {userId, nodeId} ) {
-
 		let warning
 		let nodes = this.nodeAll()
 		let node = nodes.filter((e) => e.index == nodeId)[0]
@@ -103,11 +97,7 @@ class GameHome extends Component {
 			.map((e) => e.userId)
 
 		otherOwnerIds.map((id) => {
-			if (counts.indexOf(id) == -1) {
-				counts.push( id )
-			} else {
-				dupFound = true
-			}
+			if (counts.indexOf(id) == -1) {counts.push(id)} else {dupFound = true}
 		})
 		if (dupFound)
 			return this.setState({message: "Cannot build in the middle of someone else's road"})
@@ -208,9 +198,8 @@ class GameHome extends Component {
 		return players.filter((p) => p.id == userId)[0] 
 	}
 	
-	
 	signedInUser() {
-		return this.context.store.getState().game.players.filter((e) => e.id == 0)[0] 
+		return Object.assign({}, this.context.store.getState().game.players.filter((e) => e.id == 0)[0])
 	}  
 	
   render() {
@@ -232,8 +221,7 @@ class GameHome extends Component {
 						 
 					</Text>
 						 :
-					<Text style={styles.description}>
-						 
+					<Text style={styles.description}>						 
 						 Waiting on { turnOfUser.name }{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled }` : "Has not rolled"}
 					</Text>

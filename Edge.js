@@ -26,13 +26,16 @@ class Edge extends Component{
 		
 		let indexOnes = Math.abs(this.props.index) % 10.0
 
-
 		this.rotation = {
 			0: 60,
 			1: 0,
 			2: -60
 		}[ indexOnes ]
 		
+		
+	}
+	
+	render() {
 		this.styles = {
 			unpaved: {
 				backgroundColor: "brown",
@@ -54,10 +57,7 @@ class Edge extends Component{
 				top: -Globals.hexagonSpacing * 0.25 - this.coordinates.y * Globals.hexagonSpacing,			
 			},
 		}
-		
-	}
-	
-	render() {
+
 		return (
 			 <TouchableOpacity key={`edge_${ this.props.index }`} onPress={ this.props.onPress }>
 				<View transform={[{ rotate: `${-this.rotation }deg`} ]} 
