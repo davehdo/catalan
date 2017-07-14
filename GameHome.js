@@ -52,6 +52,23 @@ class GameHome extends Component {
 		});
 	}
 	
+	buildRoad( {userId, edgeId} ) {
+		this.context.store.dispatch({ type: "BUILD_EDGE", userId, edgeId }) 
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1})
+	}
+
+	buildNode( {userId, nodeId} ) {
+		this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1})
+	}
+	
+	
+	
+	userWithTurn() {
+		let state = this.context.store.getState()
+		return state.game.players[state.game.turn]
+	}
+	
 	rollDice() {
 		if (this.context.store.getState().game.thisTurnRolled) {
 			this.setState({message: "Already rolled this turn"})
@@ -73,7 +90,12 @@ class GameHome extends Component {
 		}			
 	}
 	
-
+	userById( userId ) {
+		let players = this.context.store.getState().game.players
+		return players.filter((p) => p.id == userId)[0] 
+	}
+	
+	
 	signedInUser() {
 		return this.context.store.getState().game.players.filter((e) => e.id == 0)[0] 
 	}  
@@ -114,7 +136,10 @@ class GameHome extends Component {
 			
 			<WorldMap 
 	 			highlightNumber={ state.game.thisTurnRolled }
-	 			onPressNode={ (x) => {this.goToNode(x)} }  />
+	 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().id, nodeId: id } )}
+				onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().id, edgeId: id } )} 
+				userById={ (id) => this.userById(id) }
+				map={ state.map } />
 			
 			
 			<UserAssetsShow user={ this.signedInUser() }/>
