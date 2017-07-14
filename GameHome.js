@@ -61,13 +61,15 @@ class GameHome extends Component {
 			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
 			// this.props.worldMap.highlightNumber = newRoll
 			this.context.store.dispatch({ type: "ROLL", rollValue: newRoll })
-			this.setState({thisTurnRolled: newRoll})
+			this.setState({thisTurnRolled: newRoll, message: undefined})
 		}			
 	}
 	
 	endTurn() {
 		if (this.context.store.getState().game.thisTurnRolled) {
 			this.context.store.dispatch({ type: "END_TURN" })
+			this.setState({message: undefined})
+			
 		} else {
 			this.setState({message: "Must roll first"})
 		}			

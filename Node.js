@@ -21,33 +21,27 @@ const nodeDiameter = 30
 class Node extends Component{
 	constructor(props) {
 		super(props);
-
-		this.state = {
-			contents: this.props.contents, // 1 is a settlement and 2 is a city
-			ownedByUser: this.props.ownedByUser
-		}
+// userId
+// buildingType
+		
+		// this.state = {
+		// 	contents: this.props.buildingType, // 1 is a settlement and 2 is a city
+		// 	ownedByUser: this.props.userId
+		// }
 		// index will be like 061 or -061
 		// 061 -> should be separated to 06 and 1
 		// -061 -> should be separated to -06 and 1
-		this.indexSign = this.props.index > 0 ? 1 : -1
-		this.indexTens = this.indexSign * Math.floor( Math.abs(this.props.index) / 10.0)
-		this.indexOnes = Math.abs(this.props.index) % 10.0
+		// this.indexSign = this.props.index > 0 ? 1 : -1
+		// this.indexTens = this.indexSign * Math.floor( Math.abs(this.props.index) / 10.0)
+		// this.indexOnes = Math.abs(this.props.index) % 10.0
+		//
+		// this.rotation = {
+		// 	0: 90,
+		// 	1: 30,
+		// }[ this.indexOnes ]
+		//
 		
-		this.rotation = {
-			0: 90,
-			1: 30,
-		}[ this.indexOnes ]
-		
-		let coords = Globals.hexagonCoordinates[ this.indexTens ] || {x: 0, y: 0}
-		
-		// we don't assign hexagonCoordinates directly because we want it to be a clone
-		this.coordinates = {
-			x: coords.x || 0, 
-			y: coords.y || 0
-		}
-		
-		this.coordinates.x +=  1 / Math.sqrt(3) * Math.cos( this.rotation / 180 * 3.14159265359 )
-		this.coordinates.y +=  1 / Math.sqrt(3) * Math.sin( this.rotation / 180 * 3.14159265359 )
+		this.coordinates = {x: this.props.x, y: this.props.y} || {x: 0, y: 0}
 		
 		
 		this.styles = {
@@ -78,7 +72,7 @@ class Node extends Component{
 	
 	
 	displayContents() {
-		switch( this.state.contents ) {
+		switch( this.props.buildingType ) {
 			case 1: 
 				return "Settlement"
 				break;
@@ -93,30 +87,32 @@ class Node extends Component{
 	
 	
 	shape() {
-		switch( this.state.contents ) {
+		let color = this.props.owner ? this.props.owner.color : "white"
+		
+		switch( this.props.buildingType ) {
 			case 1:
-				return <View key={ `node_${this.props.index}` } transform={[
+				return <View key={ `n_${this.props.index}` } transform={[
 					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={styles.settlement}>
-				<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonInner), {backgroundColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
-			        <View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
+				<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonInner), {backgroundColor: color})} />
+			        <View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: color})} />
 			      </View>
 				break;
 			case 2:
 
-				return <View key={ `node_${this.props.index}` } transform={[
+				return <View key={ `n_${this.props.index}` } transform={[
 					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={styles.city}>
-				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonInner), {backgroundColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
-				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonBefore), {borderBottomColor: this.state.ownedByUser ? this.state.ownedByUser.state.color : "white"})} />
+				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonInner), {backgroundColor: color})} />
+				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonBefore), {borderBottomColor: color})} />
 				      </View>
 
 				
 				break;
 			default:
-				return <View key={ `node_${this.props.index}` } transform={[
+				return <View key={ `n_${this.props.index}` } transform={[
 					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
 				]} style={this.styles.circle} />

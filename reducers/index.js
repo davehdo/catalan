@@ -10,8 +10,31 @@
 // ROLL
 // BUILD
 
+const Globals = require("../Globals.js")
+
 
 import { combineReducers } from "redux";
+
+
+const shuffle = (array) => {
+    let counter = array.length;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        let index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        let temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+}
 
 
 const makeId = (len = 32 ) => {
@@ -29,9 +52,10 @@ const players = ( state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let houses = ["House Stark", "House Lannister", "House Tyrell"]
 		let colors = ["black", "teal", "red"]
+		let lastId = 0
 		return houses.map((h) => {
 			return({
-				id: makeId(),
+				id: lastId++,
 				name: h,
 				color: colors.shift()
 			})
@@ -41,6 +65,32 @@ const players = ( state, action) => {
 	return state
 }
 
+const map = (state, action) => {
+	if( typeof(state) == "undefined") {		
+		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
+		let resources = shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)		
+		let hexagonContents = {}
+		
+		resources.map((r,i) => { 
+			hexagonContents[i] = ({ 
+				resource: r,
+				number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), 
+			})
+		})
+		
+		let nodeContents = {170: {userId: 1, buildingType: 1}} //  
+		let edgeContents = {170: {userId: 1, road: true}}
+		
+		return {
+			hexagonContents,
+			nodeContents,
+			edgeContents
+		}
+	}
+	
+	return state
+	
+}
 
 const game = ( state, action ) => {
 	if( typeof(state) == "undefined" )
@@ -70,5 +120,6 @@ const game = ( state, action ) => {
 
 
 export const combinedReducer = combineReducers({
-	game: game
+	game: game,
+	map: map
 })

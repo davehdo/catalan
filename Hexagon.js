@@ -21,7 +21,7 @@ class Hexagon extends Component {
 	constructor(props) {
 		super(props); // props includes highlight, number, resource, and index
 
-		this.coordinates = Globals.hexagonCoordinates[ this.props.index ] || {x: 0, y: 0}
+		this.coordinates = {x: this.props.x, y: this.props.y} || {x: 0, y: 0}
 		
 		let sideToSideWidth = Globals.hexagonSpacing 
 		

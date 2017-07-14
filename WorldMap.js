@@ -29,29 +29,7 @@ class WorldMap extends Component {
 		// by convention, map is flat on top
 		// numbering is outside-in with a spiral
 		// starting top row, left most hexagon, and moving clockwise
-		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
-		let resources = this.shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)
 
-		this.state = {
-			highlightNumber: props ? props.highlightNumber : undefined,
-			hexagonProperties: resources.map((r,i) => { 
-				return({ 
-					index: i, 
-					resource: r,
-					number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), 
-				})
-			}),
-			nodeContents: {},
-			edgeContents: {}
-		}
-		
-		
-		// ==========================  produce the hexagon objects  ==========================
-		// goal is that whats above this point contains enough information to completely 
-		// configure the entire map, and everything below is simply for drawing
-		
-		let num
-		
 		this.siblingRefFunctions = {
 			nodesWithinRadius: (h,r) => this.nodesWithinRadius(h,r),
 			edgesWithinRadius: (h,r) => this.edgesWithinRadius(h,r),
@@ -97,25 +75,6 @@ class WorldMap extends Component {
 	
 	
 	
-	shuffle(array) {
-	    let counter = array.length;
-
-	    // While there are elements in the array
-	    while (counter > 0) {
-	        // Pick a random index
-	        let index = Math.floor(Math.random() * counter);
-
-	        // Decrease counter by 1
-	        counter--;
-
-	        // And swap the last element with it
-	        let temp = array[counter];
-	        array[counter] = array[index];
-	        array[index] = temp;
-	    }
-
-	    return array;
-	}
 	
 	calculateUnitsForUser( user ) {		
 		user.setState({
@@ -125,20 +84,16 @@ class WorldMap extends Component {
 		}) 
 	}
 
+	userById( userId ) {
+		let players = this.context.store.getState().game.players
+		return players.filter((p) => p.id == userId)[0] || players[0]
+	}
+	
 	render() {
-		let edgeIds = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 
-			150, 160, 170, 180, 1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101, 111, 121, 
-			131, 141, 151, 161, 171, 181, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 
-			112, 122, 132, 142, 152, 162, 172, 182,   -40, -50, -60, -70, -80,
-			-11, -21, -31, -41, -51,   -12, -22, -162, -172, -182]
-			
-
-		// ==========================  produce the nodes  ==========================
 		
-		let nodeIds = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 
-			150, 160, 170, 180, 1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101, 111, 121, 
-			131, 141, 151, 161, 171, 181,   -40, -50, -60, -70, -80, -90, -100, -110, 
-			-11, -21, -31, -41, -51, -61, -71, -81]
+		let hexagonContents = this.context.store.getState().map.hexagonContents
+		let nodeContents = this.context.store.getState().map.nodeContents
+		let edgeContents = this.context.store.getState().map.edgeContents
 		
 		
 		return(
@@ -148,20 +103,24 @@ class WorldMap extends Component {
 				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }} >
 					<View transform={[{scaleX: 0.3}, {scaleY: 0.3}]} style={{ position: "absolute"}}>
 
-					{ this.state.hexagonProperties.map((e) => 
+					{ Globals.hexagons.map((e) => 
 						<Hexagon key={`hex_${e.index}`} 
-							highlight={ this.state.highlightNumber == e.number }
+							highlight={ this.props.highlightNumber == hexagonContents[e.index].number }
 							{...e}
+							{...hexagonContents[e.index]}
 							{...this.siblingRefFunctions} />
 					)}
 
-					{ edgeIds.map((h) => 
-						<Edge key={`edge_${h}`}
-							index={h}
+					{ Globals.edges.map((h) => 
+						<Edge key={`edge_${h.index}`} 
+							owner={ edgeContents[h.index] ? this.userById(  edgeContents[h.index].userId ) : undefined}
+							{...h} 
+							{ ...edgeContents[h.index] }
 							{...this.siblingRefFunctions} />)}
 
-					{ nodeIds.map((h) => 
-						<Node key={ h } index={ h }
+					{ Globals.nodes.map((h) => 
+						<Node key={ h.index } { ...h } { ...nodeContents[h.index] } 
+							owner={nodeContents[h.index] ? this.userById( nodeContents[h.index].userId ) : undefined}
 							onPress={ this.props ? this.props.onPressNode : () => {} }
 							{...this.siblingRefFunctions} /> )}			
 
@@ -172,6 +131,9 @@ class WorldMap extends Component {
 		}
 }
 
+WorldMap.contextTypes = {
+	store: React.PropTypes.object
+}
 
 
 module.exports = WorldMap;
