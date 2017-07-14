@@ -59,6 +59,8 @@ class GameHome extends Component {
 		if (edge.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0 &&
 				edge.adjacentNodes().filter((e) => e.buildingType && e.userId == userId).length == 0)
 			return this.setState({message: "Warning: no adjacent road/building"})
+		if (this.userWithTurn().nRoads() >= Globals.maxRoads)
+			return this.setState({message: "No road pieces remain"})
 			
 		// cannot build through someones building
 			
@@ -200,21 +202,27 @@ class GameHome extends Component {
 	}
 	
 	signedInUser() {
-		let signedInId = 0 // this is temporary
+		let targetId = 0 // = signedInId  this is temporary
 		
 		let state = this.context.store.getState()
 		
 		return Object.assign({
-			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == signedInId && v.buildingType == 1).length,
-			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == signedInId && v.buildingType == 2).length,
-			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == signedInId && v.road).length
-		}, this.context.store.getState().game.players.filter((e) => e.id == signedInId)[0])
+			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 1).length,
+			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 2).length,
+			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length
+		}, this.context.store.getState().game.players.filter((e) => e.id == targetId)[0])
 	}  
 
 	userWithTurn() {
 		let state = this.context.store.getState()
+		let player = state.game.players[state.game.turn]
+		let targetId = player.id
+		
 		return Object.assign({
-		}, state.game.players[state.game.turn])
+			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 1).length,
+			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 2).length,
+			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length
+		}, player)
 	}
 	
 
