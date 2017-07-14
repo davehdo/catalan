@@ -43,7 +43,6 @@ class GameHome extends Component {
 	}
 	
 
-	
 	goToNode(n) {
 		this.props.navigator.push({
 			title: 'Node',
@@ -52,18 +51,117 @@ class GameHome extends Component {
 		});
 	}
 	
+	
 	buildRoad( {userId, edgeId} ) {
+		let edges = this.edgeAll()
+		let warning
+		
+		let edge = edges.filter((e) => e.index == edgeId)[0]
+		if (edge && edge.road )
+			return this.setState({message: "There is already a road there"})
+			
+		if (edge.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0)
+			warning = "Warning: no adjacent road"
+			
+		// cannot build through someones building
+			
 		this.context.store.dispatch({ type: "BUILD_EDGE", userId, edgeId }) 
 		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1})
+		this.setState({message: warning})
 	}
 
+	nodeLacksNeighbors( nodeId ) {
+		
+		let nodeCoords = Globals.nodes.filter((e) => e.index == nodeId)[0]
+		let nodeContents = this.context.store.getState().map.nodeContents
+		
+		return nodeCoords.adjNodes.filter((id) => nodeContents[id] && nodeContents[id].buildingType).length == 0
+	}
+	
 	buildNode( {userId, nodeId} ) {
-		this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
-		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1})
+
+		let warning
+		let nodes = this.nodeAll()
+		let node = nodes.filter((e) => e.index == nodeId)[0]
+		
+		// look for reasons not to allow building
+		if (node && node.buildingType >= 1 && node.userId != userId)
+			return this.setState({message: "Someone else has already built here"})
+		if (node && node.buildingType == 2)
+			return this.setState({message: "There is already a city here"})
+
+		if (node.adjacentNodes().filter((n) => n.buildingType).length > 0)
+			return this.setState({message: "Too close to other buildings"})
+
+		if (node.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0)
+			warning = "Warning: theres no adjacent road" 
+		// see if any one owner (thats no the building user) owns 2 or more nodes
+		let counts = []
+		let dupFound = false 
+		let otherOwnerIds = node.adjacentEdges()
+			.filter((e) => e.road && e.userId != userId)
+			.map((e) => e.userId)
+
+		otherOwnerIds.map((id) => {
+			if (counts.indexOf(id) == -1) {
+				counts.push( id )
+			} else {
+				dupFound = true
+			}
+		})
+		if (dupFound)
+			return this.setState({message: "Cannot build in the middle of someone else's road"})
+
+			
+		if (node && node.buildingType == 1)	{
+			// upgrade settlement to city
+
+			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ORE: -2, WHEAT: -3})
+		} else {
+			// build a settlement
+			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1})
+		}
+		return this.setState({message: warning})
+		
 	}
 	
 	
+	hexagonAll() {
+		let hexagonContents = this.context.store.getState().map.hexagonContents
+		return Globals.hexagons.map((h) => Object.assign({ 
+			adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
+			adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
+		}, h, hexagonContents[h.index]))
+	}
+
+	// hexagonFind( arr_or_id ) {
+	// 	if (typeof(arr_or_id) == "Array") {
+	// 		return arr_or_id.map((id) => this.hexagonAll().filter((e) => e.index == id)[0])
+	// 	} else {
+	// 		return this.hexagonAll().filter((e) => e.index == arr_or_id)[0]
+	// 	}
+	// }
 	
+	edgeAll() {
+		let edgeContents = this.context.store.getState().map.edgeContents
+		return Globals.edges.map((h) => Object.assign({ 
+			adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
+			adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
+			// adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 )
+		}, h, edgeContents[h.index]))
+	}
+
+	nodeAll() {
+		let nodeContents = this.context.store.getState().map.nodeContents
+		return Globals.nodes.map((h) => Object.assign({
+			adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
+			adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
+		}, h, nodeContents[h.index]))
+	}
+
+
 	userWithTurn() {
 		let state = this.context.store.getState()
 		return state.game.players[state.game.turn]
@@ -76,7 +174,22 @@ class GameHome extends Component {
 			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
 			// this.props.worldMap.highlightNumber = newRoll
 			this.context.store.dispatch({ type: "ROLL", rollValue: newRoll })
-			this.setState({thisTurnRolled: newRoll, message: undefined})
+			this.setState({message: undefined})
+			
+			// reward the players 
+			let winningHexagons = this.hexagonAll().filter((h) => h.number == newRoll)
+			
+			winningHexagons.map((hex) => {
+				hex.adjacentNodes().map((node) => {
+					if (node.buildingType) {
+						let action = {type: "ADJUST_RESOURCES", userId: node.userId}
+						action[ hex.resource ] = node.buildingType
+						this.context.store.dispatch(action)
+					}
+					
+				})
+				
+			})
 		}			
 	}
 	
