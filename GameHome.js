@@ -22,10 +22,6 @@ class GameHome extends Component {
 	constructor(props) {
 		super(props);
 
-		// props includes
-		// worldMap
-		// signedInUser
-		// users
 		
 		this.state = {
 			message: undefined // not quite relevant to the nonactive users--personalize this?
@@ -77,6 +73,10 @@ class GameHome extends Component {
 		}			
 	}
 	
+
+	signedInUser() {
+		return this.context.store.getState().game.players.filter((e) => e.id == 0)[0] 
+	}  
 	
   render() {
 	  let state = this.context.store.getState()
@@ -90,7 +90,7 @@ class GameHome extends Component {
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
-						( turnOfUser == this.props.signedInUser ) ?
+						( turnOfUser == this.signedInUser() ) ?
 					<Text style={styles.description}>
 						 { turnOfUser.name }, its your turn{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled}. Tap map to build` : "Roll dice"}
@@ -117,8 +117,8 @@ class GameHome extends Component {
 	 			onPressNode={ (x) => {this.goToNode(x)} }  />
 			
 			
-				<UserAssetsShow user={ this.props.signedInUser }/>
-
+			<UserAssetsShow user={ this.signedInUser() }/>
+				
  			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
 	 				 <Button
 	 				   onPress={() => this.endTurn()}

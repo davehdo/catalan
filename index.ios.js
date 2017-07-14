@@ -65,7 +65,7 @@ export default class Catalan extends Component {
 				initialRoute={{
 				 title: `Catalan`,
 				 component: GameHome,
-				  passProps: {signedInUser:  store.getState().game.players.filter((e) => e.id == 0)[0] }
+				  passProps: {}
 				}}/>
 			</Provider>
 		);

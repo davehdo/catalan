@@ -78,6 +78,14 @@ expect(
 // ==========================================================================
 // ===========================  specs for player  ===========================
 expect(
+	typeof(Reducer.player(undefined, {}))
+).toEqual( "object" )
+
+expect(
+	Reducer.player(undefined, {}).id 
+).toNotEqual( undefined )
+
+expect(
 	Reducer.player({ 
 		id: undefined,
 		name: 'Unnamed player',
@@ -86,11 +94,12 @@ expect(
 	}, {type: "ADJUST_RESOURCES", WHEAT: -1}).resourceCount.WHEAT
 ).toEqual( 9 )
 
-// ==========================================================================
-// ===========================  specs for players  ===========================
+// ============================================================================
+// ===========================  specs for players  ============================
 expect(
 	typeof(Reducer.players(undefined, {}))
 ).toEqual( "object" )
+
 
 expect(
 	Reducer.players([{ 
@@ -119,8 +128,8 @@ expect(
 	}], {type: "ADJUST_RESOURCES", WHEAT: -1, userId: 13})[0].resourceCount.WHEAT
 ).toEqual( 10 )
 
-// ==========================================================================
-// ========================  specs for edgeContents  ========================
+// ============================================================================
+// =========================  specs for edgeContents  =========================
 expect(
 	typeof(Reducer.edgeContents(undefined, {}))
 ).toEqual( "object")
@@ -135,8 +144,8 @@ expect(
 
 
 
-// ==========================================================================
-// ========================  specs for nodeContents  ========================
+// ============================================================================
+// ==========================  specs for nodeContents  ========================
 expect(
 	typeof(Reducer.nodeContents(undefined, {}))
 ).toEqual( "object")
@@ -151,12 +160,26 @@ expect(
 
 
 
-// ==========================================================================
-// ===========================  specs for map  ===========================
+// ============================================================================
+// =============================  specs for map  ==============================
 
 expect(
 	typeof(Reducer.map(undefined, {}))
 ).toEqual( "object" )
+
+
+// ============================================================================
+// =============================  specs for game  =============================
+
+expect(
+	typeof(Reducer.game(undefined, {}))
+).toEqual( "object" )
+
+let player = Reducer.player(undefined, {})
+
+expect(
+	Reducer.game({players: [ player ]}, {type: "ADJUST_RESOURCES", WHEAT: -1, userId: player.id}).players[0].resourceCount.WHEAT
+).toEqual( player.resourceCount.WHEAT - 1)
 
 
 // console.log( Reducer.player( undefined, {}))

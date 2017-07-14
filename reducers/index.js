@@ -73,7 +73,7 @@ const resourceCount = (state, action) => {
 const player = ( state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		return {
-			id: undefined,
+			id: makeId(),
 			name: "Unnamed player",
 			color: "white",
 			resourceCount: resourceCount(undefined, {})
@@ -204,7 +204,7 @@ const map = (state, action) => {
 const game = ( state, action ) => {
 	if( typeof(state) == "undefined" )
 		return {
-			players: players(), 
+			players: players(undefined, {}), 
 			round: 0, 
 			turn: 0,
 			thisTurnRolled: undefined
@@ -222,6 +222,13 @@ const game = ( state, action ) => {
 				state, 
 				{ thisTurnRolled: action.rollValue }
 			);
+		case "ADJUST_RESOURCES":
+			return Object.assign(
+				{}, 
+				state, 
+				{ players: players( state.players, action) }
+			);
+			
 		default:
 			return state;
 	}
