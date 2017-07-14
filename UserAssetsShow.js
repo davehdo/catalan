@@ -30,10 +30,12 @@ class UserAssetsShow extends Component {
 	constructor(props) {
 	  super(props);
 	  
-	  this.state = props.user.state;
+	  // this.state = props.user.state;
 	}
 
   render() {
+
+		  
     return (
 			<View style={{ flexDirection: "row", padding: 10}}>						 
 				 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }}>
@@ -43,7 +45,7 @@ class UserAssetsShow extends Component {
 						 	<Text style={styles.smallStats}>C 3/{Globals.maxCities}</Text>
 						 	<Text style={styles.smallStats}>R 3/{Globals.maxRoads}</Text>
 						</View>
-						 { Globals.resourceCardColorMapArray.map((e) => <Card key={ e[1] } count={ this.state.resourceCount[e[0]] } color={ e[1]}/>)}
+						 { Globals.resourceCardColorMapArray.map((e) => <Card key={ e[1] } count={ 1} color={ e[1]}/>)}
 						
 				 </View>
 			</View>

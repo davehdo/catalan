@@ -15,7 +15,7 @@ const Globals = require("./Globals.js")
 // const NodeShow = require('./NodeShow.js');
 
 
-const edgeThickness = 10
+const edgeThickness = 16
 
 
 class Edge extends Component{
@@ -58,23 +58,12 @@ class Edge extends Component{
 	}
 	
 	render() {
-		if (this.props.road ) {
-			
-			return (
-				 <TouchableOpacity key={`edge_${ this.index }`} >
-					<View transform={[{ rotate: `${-this.rotation }deg`} ]} 
-					style={ this.styles.paved } />
-				</TouchableOpacity>
-			)
-		} else {
-			
-			return (
-				 <TouchableOpacity key={`edge_${ this.index }`} >
-					<View transform={[{ rotate: `${-this.rotation }deg`} ]} 
-					style={this.styles.unpaved} />
-				</TouchableOpacity>
-			)
-		}
+		return (
+			 <TouchableOpacity key={`edge_${ this.props.index }`} onPress={ this.props.onPress }>
+				<View transform={[{ rotate: `${-this.rotation }deg`} ]} 
+				style={ this.props.road ? this.styles.paved : this.styles.unpaved } />
+			</TouchableOpacity>
+		)
 	}
 }
 

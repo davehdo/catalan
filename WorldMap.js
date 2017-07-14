@@ -89,13 +89,18 @@ class WorldMap extends Component {
 		return players.filter((p) => p.id == userId)[0] || players[0]
 	}
 	
+	
+	userWithTurn() {
+		let state = this.context.store.getState()
+		return state.game.players[state.game.turn]
+	}
+	
 	render() {
-		
-		let hexagonContents = this.context.store.getState().map.hexagonContents
-		let nodeContents = this.context.store.getState().map.nodeContents
-		let edgeContents = this.context.store.getState().map.edgeContents
-		
-		
+		let state = this.context.store.getState()
+		let hexagonContents = state.map.hexagonContents
+		let nodeContents = state.map.nodeContents
+		let edgeContents = state.map.edgeContents
+		//this.props ? this.props.onPressNode : () => {} 
 		return(
 			<View style={{ backgroundColor: "lightblue", flexDirection: "row"  }}>
 				<View style={{flex: 1 }}></View>
@@ -107,22 +112,20 @@ class WorldMap extends Component {
 						<Hexagon key={`hex_${e.index}`} 
 							highlight={ this.props.highlightNumber == hexagonContents[e.index].number }
 							{...e}
-							{...hexagonContents[e.index]}
-							{...this.siblingRefFunctions} />
+							{...hexagonContents[e.index]} />
 					)}
 
 					{ Globals.edges.map((h) => 
 						<Edge key={`edge_${h.index}`} 
-							owner={ edgeContents[h.index] ? this.userById(  edgeContents[h.index].userId ) : undefined}
+							owner={ edgeContents[h.index] ? this.userById( edgeContents[h.index].userId ) : undefined}
 							{...h} 
 							{ ...edgeContents[h.index] }
-							{...this.siblingRefFunctions} />)}
+							onPress={ () => this.context.store.dispatch({ type: "BUILD_EDGE", userId: this.userWithTurn().id, edgeId: h.index })} />)}
 
 					{ Globals.nodes.map((h) => 
 						<Node key={ h.index } { ...h } { ...nodeContents[h.index] } 
 							owner={nodeContents[h.index] ? this.userById( nodeContents[h.index].userId ) : undefined}
-							onPress={ this.props ? this.props.onPressNode : () => {} }
-							{...this.siblingRefFunctions} /> )}			
+							onPress={ () => this.context.store.dispatch({ type: "BUILD_NODE", userId: this.userWithTurn().id, nodeId: h.index })}  /> )}			
 
 					</View>
 				</View>

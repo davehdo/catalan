@@ -88,10 +88,10 @@ class GameHome extends Component {
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
-						( turnOfUser == this.state.signedInUser ) ?
+						( turnOfUser == this.props.signedInUser ) ?
 					<Text style={styles.description}>
-						 { turnOfUser.name }{ state.game.thisTurnRolled ? ` rolled ${ state.game.thisTurnRolled}` : ", its your turn"}{ "\n" }
-						 { state.game.thisTurnRolled ? `Tap spot on the map to build` : "Roll dice"}
+						 { turnOfUser.name }, its your turn{ "\n" }
+						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled}. Tap map to build` : "Roll dice"}
 						 
 					</Text>
 						 :
@@ -112,11 +112,10 @@ class GameHome extends Component {
 			
 			<WorldMap 
 	 			highlightNumber={ state.game.thisTurnRolled }
-	 			onPressNode={ (x) => {this.goToNode(x)} }
-	 			{...this.props.worldMap.props} />
+	 			onPressNode={ (x) => {this.goToNode(x)} }  />
 			
 			
-		 	<UserAssetsShow user={ this.props.signedInUser }/>
+				<UserAssetsShow user={ this.props.signedInUser }/>
 
  			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
 	 				 <Button
@@ -141,7 +140,8 @@ class GameHome extends Component {
 
 // allows us to access store as this.context.store
 GameHome.contextTypes = {
-	store: React.PropTypes.object
+	store: React.PropTypes.object,
+	signedInUser: React.PropTypes.object
 }
 
 var styles = StyleSheet.create({

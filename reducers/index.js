@@ -9,6 +9,8 @@
 // END_TURN
 // ROLL
 // BUILD
+// { type: "BUILD_EDGE", userId: _, edgeId: _ }
+// { type: "BUILD_NODE", userId: _, edgeId: _ }
 
 const Globals = require("../Globals.js")
 
@@ -65,6 +67,8 @@ const players = ( state, action) => {
 	return state
 }
 
+// { type: "BUILD_EDGE", userId: _, edgeId: _ }
+// { type: "BUILD_NODE", userId: _, nodeId: _ }
 const map = (state, action) => {
 	if( typeof(state) == "undefined") {		
 		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
@@ -78,8 +82,8 @@ const map = (state, action) => {
 			})
 		})
 		
-		let nodeContents = {170: {userId: 1, buildingType: 1}} //  
-		let edgeContents = {170: {userId: 1, road: true}}
+		let nodeContents = {} //  
+		let edgeContents = {}
 		
 		return {
 			hexagonContents,
@@ -88,7 +92,27 @@ const map = (state, action) => {
 		}
 	}
 	
-	return state
+	switch( action.type ) {
+		case "BUILD_EDGE":
+			let add = {}
+			add[ action.edgeId ] = { road: true, userId: action.userId }
+			return {
+				hexagonContents: state.hexagonContents,
+				nodeContents: state.nodeContents,
+				edgeContents: Object.assign({}, state.edgeContents, add),
+			}
+		case "BUILD_NODE":
+			let nodeObj = {}
+			nodeObj[ action.nodeId ] = { buildingType: 1, userId: action.userId }
+			
+			return {
+				hexagonContents: state.hexagonContents,
+				nodeContents: Object.assign({}, state.nodeContents, nodeObj),
+				edgeContents: state.edgeContents,
+			}
+		default:
+			return state
+	}
 	
 }
 

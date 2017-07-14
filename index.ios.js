@@ -47,24 +47,24 @@ export default class Catalan extends Component {
 	constructor() {
 		
 		super()
-		this.signedInUser = new User({name: "House Lannister", color: "red"})
-		this.users = [
-			new User({name: "House Tyrell", color: "teal"}), 
-			new User({name: "House Fray", color: "black"}), 
-			this.signedInUser
-		]
+		// this.signedInUser = new User({name: "House Lannister", color: "red"})
+		// this.users = [
+		// 	new User({name: "House Tyrell", color: "teal"}),
+		// 	new User({name: "House Fray", color: "black"}),
+		// 	this.signedInUser
+		// ]
 
 	}
 	
 	render() {
 		return (
-			<Provider store={store}>
+			<Provider store={store} >
 				<NavigatorIOS
 				style={styles.container}
 				initialRoute={{
 				 title: `Catalan`,
 				 component: GameHome,
-				  passProps: {worldMap: new WorldMap(), signedInUser: this.signedInUser, users: this.users}
+				  passProps: {signedInUser:  store.getState().game.players.filter((e) => e.id == 0)[0] }
 				}}/>
 			</Provider>
 		);

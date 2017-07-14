@@ -124,7 +124,7 @@ class Node extends Component{
 	render() {
 		
 		return (
-			<TouchableOpacity key={`node_${ this.props.index }`} onPress={ () => this.props.onPress(this) }>
+			<TouchableOpacity key={`node_${ this.props.index }`} onPress={ this.props.onPress }>
 				{ this.shape() }
 			</TouchableOpacity>
 		)
