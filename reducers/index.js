@@ -8,14 +8,14 @@
 // actions
 // END_TURN
 // ROLL
-// BUILD
+// { type: "ADJUST_RESOURCES", userId, ORE: _, BRICK: _, LUMBER: _, SHEEP: _, WHEAT: _}
 // { type: "BUILD_EDGE", userId: _, edgeId: _ }
 // { type: "BUILD_NODE", userId: _, nodeId: _ }
 
 const Globals = require("../Globals.js")
-
-
-import { combineReducers } from "redux";
+const Redux = require( "redux")
+const combineReducers = Redux.combineReducers
+// import { combineReducers } from "redux";
 
 
 const shuffle = (array) => {
@@ -49,77 +49,157 @@ const makeId = (len = 32 ) => {
   return text;
 }
 
+const resourceCount = (state, action) => {
+	if( typeof( state ) == "undefined" ) {
+		let resourceCount = {}
+		Object.keys(Globals.resourceCards).map((v) => resourceCount[v] = 10)
+		return resourceCount
+	}
+	
+	switch( action.type ) {
+		case "ADJUST_RESOURCES":
+			let newResourceCount = {}
+			Object.keys(Globals.resourceCards).map((v) => newResourceCount[v] = state[v] + (action[v] || 0))
+			return newResourceCount
+
+		default:
+			return state
+		
+	}
+}
+
+
+// { type: "ADJUST_RESOURCES", userId, ORE: _, BRICK: _, LUMBER: _, SHEEP: _, WHEAT: _}
+const player = ( state, action) => {
+	if( typeof( state ) == "undefined" ) {
+		return {
+			id: undefined,
+			name: "Unnamed player",
+			color: "white",
+			resourceCount: resourceCount(undefined, {})
+		}
+	}
+	switch( action.type ) {
+		case "ADJUST_RESOURCES":
+			return Object.assign({}, state, {resourceCount: resourceCount( state.resourceCount, action) })
+		default:
+			return state
+	}	
+	
+}
 
 const players = ( state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let houses = ["House Stark", "House Lannister", "House Tyrell"]
 		let colors = ["black", "teal", "red"]
 		let lastId = 0
-		let resourceCount = {}
-		Object.values(Globals.resources).map((v) => resourceCount[v] = Math.ceil( Math.random() * 10 ))
 		
 		return houses.map((h) => {
 			return({
 				id: lastId++,
 				name: h,
 				color: colors.shift(),
-				resourceCount
+				resourceCount: resourceCount(undefined, {})
 			})
 		})		
 	}
 	
-	return state
+	switch( action.type ) {
+		case "ADJUST_RESOURCES":
+			return state.map((p) => (p.id != undefined && p.id == action.userId) ? player(p, action) : p) 
+		
+		// case "BUILD_EDGE":
+		// 	let add = {}
+		// 	add[ action.edgeId ] = { road: true, userId: action.userId }
+		// 	return {
+		// 		hexagonContents: state.hexagonContents,
+		// 		nodeContents: state.nodeContents,
+		// 		edgeContents: Object.assign({}, state.edgeContents, add),
+		// 	}
+		// case "BUILD_NODE":
+		// 	let nodeObj = {}
+		// 	let priorBuildingType = state.nodeContents[ action.nodeId ] ? state.nodeContents[ action.nodeId ].buildingType : 0
+		// 	nodeObj[ action.nodeId ] = { buildingType: priorBuildingType >= 2 ? 2 : priorBuildingType + 1, userId: action.userId }
+		//
+		// 	return {
+		// 		hexagonContents: state.hexagonContents,
+		// 		nodeContents: Object.assign({}, state.nodeContents, nodeObj),
+		// 		edgeContents: state.edgeContents,
+		// 	}
+		default:
+			return state
+	}
+	
 }
 
-// { type: "BUILD_EDGE", userId: _, edgeId: _ }
-// { type: "BUILD_NODE", userId: _, nodeId: _ }
-const map = (state, action) => {
-	if( typeof(state) == "undefined") {		
-		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
-		let resources = shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)		
-		let hexagonContents = {}
+const nodeContents = (state, action) => {
+	if (typeof(state) == "undefined") {
+		return {}
+	}
 		
-		resources.map((r,i) => { 
-			hexagonContents[i] = ({ 
-				resource: r,
-				number: num = (r == Globals.resources.DESERT) ? undefined : numbers.shift(), 
-			})
-		})
+	switch( action.type ) {
+		case "BUILD_NODE":
+			let nodeObj = {}
+			let priorBuildingType = state[ action.nodeId ] ? state[ action.nodeId ].buildingType : 0
+			nodeObj[ action.nodeId ] = { buildingType: priorBuildingType >= 2 ? 2 : priorBuildingType + 1, userId: action.userId }
+			
+			return Object.assign({}, state, nodeObj)
+		default:
+			return state
+	}
+}
+const edgeContents = (state, action) => {
+	if (typeof(state) == "undefined") {
 		
-		let nodeContents = {} //  
-		let edgeContents = {}
-		
-		return {
-			hexagonContents,
-			nodeContents,
-			edgeContents
-		}
+		return {}
 	}
 	
 	switch( action.type ) {
 		case "BUILD_EDGE":
 			let add = {}
 			add[ action.edgeId ] = { road: true, userId: action.userId }
-			return {
-				hexagonContents: state.hexagonContents,
-				nodeContents: state.nodeContents,
-				edgeContents: Object.assign({}, state.edgeContents, add),
-			}
-		case "BUILD_NODE":
-			let nodeObj = {}
-			let priorBuildingType = state.nodeContents[ action.nodeId ] ? state.nodeContents[ action.nodeId ].buildingType : 0
-			nodeObj[ action.nodeId ] = { buildingType: priorBuildingType >= 2 ? 2 : priorBuildingType + 1, userId: action.userId }
-			
-			return {
-				hexagonContents: state.hexagonContents,
-				nodeContents: Object.assign({}, state.nodeContents, nodeObj),
-				edgeContents: state.edgeContents,
-			}
+			return Object.assign({}, state, add)
 		default:
 			return state
 	}
 	
 }
+
+// { type: "BUILD_EDGE", userId: _, edgeId: _ }
+// { type: "BUILD_NODE", userId: _, nodeId: _ }
+const map = (state, action) => {
+	if( typeof(state) == "undefined") {
+		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
+		let resources = shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)
+		let hexagonContents = {}
+
+		resources.map((r,i) => {
+			hexagonContents[i] = ({
+				resource: r,
+				number: (r == Globals.resources.DESERT) ? undefined : numbers.shift(),
+			})
+		})
+
+	//
+		return {
+			hexagonContents,
+			nodeContents: nodeContents(undefined, {}),
+			edgeContents: edgeContents(undefined, {})
+		}
+	}
+	//
+	switch( action.type ) {
+		case "BUILD_EDGE":
+			return Object.assign({}, state, {edgeContents: edgeContents( state.edgeContents, action)})
+		case "BUILD_NODE":
+			return Object.assign({}, state, {nodeContents: nodeContents( state.nodeContents, action)})
+		default:
+			return state
+	}
+	
+}
+
+// // { type: "ADJUST_RESOURCES", userId, ORE: _, BRICK: _, LUMBER: _, SHEEP: _, WHEAT: _}
 
 const game = ( state, action ) => {
 	if( typeof(state) == "undefined" )
@@ -148,7 +228,16 @@ const game = ( state, action ) => {
 }
 
 
-export const combinedReducer = combineReducers({
-	game: game,
-	map: map
-})
+module.exports = { 
+	game, 
+	map, 
+	resourceCount,
+	player,
+	players,
+	edgeContents,
+	nodeContents,
+	reducerMaster: combineReducers({
+		game,
+		map
+	})
+}

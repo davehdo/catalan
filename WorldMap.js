@@ -28,71 +28,28 @@ class WorldMap extends Component {
 		
 		// by convention, map is flat on top
 		// numbering is outside-in with a spiral
-		// starting top row, left most hexagon, and moving clockwise
-
-		this.siblingRefFunctions = {
-			nodesWithinRadius: (h,r) => this.nodesWithinRadius(h,r),
-			edgesWithinRadius: (h,r) => this.edgesWithinRadius(h,r),
-			hexagonsWithinRadius: (h,r) => this.hexagonsWithinRadius(h,r)				
-		}
-		
+		// starting top row, left most hexagon, and moving clockwise		
 	}
 	
-	
-	nodesWithinRadius(refObj, expectedDistance ) {
-		return [].filter( (n2) => {
-			if (n2) {
-				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
-				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)					
-			} else {
-				return false
-			}
-			 
-		})
-	}
-	
-	edgesWithinRadius(refObj, expectedDistance ) {
-		return [].filter( (n2) => {
-			if (n2) {				
-				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
-				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)	
-			} else {
-				return false
-			}
-		})
-	}
-	
-	hexagonsWithinRadius(refObj, expectedDistance ) {
-		return [].filter( (n2) => {
-			if (n2) {				
-				let d_sq = (refObj.coordinates.x - n2.coordinates.x ) ** 2 + (refObj.coordinates.y - n2.coordinates.y) ** 2
-				return (d_sq < ( expectedDistance + 0.1 ) ** 2) && (d_sq > (expectedDistance - 0.1) ** 2)	
-			} else {
-				return false 
-			}
-		})
-	}
-	
-	
-	
-	
-	calculateUnitsForUser( user ) {		
-		user.setState({
-			nDeployedSettlements: this.nodes.filter((n) => n.state.contents == 1 && n.state.ownedByUser == user).length, 
-			nDeployedCities: this.nodes.filter((n) => n.state.contents == 2 && n.state.ownedByUser == user).length, 
-			nDeployedRoads: this.edges.filter((n) => n.state).length
-		}) 
-	}
-
 	userById( userId ) {
 		let players = this.context.store.getState().game.players
-		return players.filter((p) => p.id == userId)[0] || players[0]
+		return players.filter((p) => p.id == userId)[0] 
 	}
 	
 	
 	userWithTurn() {
 		let state = this.context.store.getState()
 		return state.game.players[state.game.turn]
+	}
+	
+	buildRoad( {userId, edgeId} ) {
+		this.context.store.dispatch({ type: "BUILD_EDGE", userId, edgeId }) 
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, WOOD: -1, BRICK: -1})
+	}
+
+	buildNode( {userId, nodeId} ) {
+		this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, WOOD: -1, BRICK: -1, SHEEP: -1, WHEAT: -1})
 	}
 	
 	render() {
@@ -120,12 +77,12 @@ class WorldMap extends Component {
 							owner={ edgeContents[h.index] ? this.userById( edgeContents[h.index].userId ) : undefined}
 							{...h} 
 							{ ...edgeContents[h.index] }
-							onPress={ () => this.context.store.dispatch({ type: "BUILD_EDGE", userId: this.userWithTurn().id, edgeId: h.index })} />)}
+							onPress={ () => this.buildRoad({userId: this.userWithTurn().id, edgeId: h.index }) }/>)}
 
 					{ Globals.nodes.map((h) => 
 						<Node key={ h.index } { ...h } { ...nodeContents[h.index] } 
 							owner={nodeContents[h.index] ? this.userById( nodeContents[h.index].userId ) : undefined}
-							onPress={ () => this.context.store.dispatch({ type: "BUILD_NODE", userId: this.userWithTurn().id, nodeId: h.index })}  /> )}			
+							onPress={ () => this.buildNode({userId: this.userWithTurn().id, nodeId: h.index })}  /> )}			
 
 					</View>
 				</View>

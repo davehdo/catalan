@@ -18,7 +18,8 @@ import { createStore, applyMiddleware, combineReducers, compose} from "redux";
 import {Provider} from "react-redux";
 import thunkMiddleware from "redux-thunk"
 import {createLogger} from "redux-logger"
-import {combinedReducer} from "./reducers/index"
+
+const Reducer = require("./reducers/index")
 
 const loggerMiddleware = createLogger({ predicte: (getState, action) => __DEV__ })
 const configureStore = (initialState) => {
@@ -28,7 +29,7 @@ const configureStore = (initialState) => {
 			loggerMiddleware
 		),
 	);
-	return createStore(combinedReducer, initialState, enhancer)
+	return createStore(Reducer.reducerMaster, initialState, enhancer)
 }
 
 // store methods are getState, dispatch, and subscribe

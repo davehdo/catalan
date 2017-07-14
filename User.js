@@ -23,9 +23,6 @@ class User extends Component {
 		  name: this.props.name,
 		  color: this.props.color,
 		  resourceCount: resourceCount,
-		  nDeployedSettlements: 0,
-		  nDeployedCities: 0,
-		  nDeployedRoads: 0,
 	  };
 	  
 	  

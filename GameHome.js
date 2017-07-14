@@ -46,6 +46,8 @@ class GameHome extends Component {
 			this.unsubscribe()
 	}
 	
+
+	
 	goToNode(n) {
 		this.props.navigator.push({
 			title: 'Node',
