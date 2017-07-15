@@ -75,6 +75,32 @@ expect(
 ).toEqual( 10 );
 
 
+
+// ============================================================================
+// ===========================  specs for dev count  ============================
+expect(
+	typeof(Reducer.devCount(undefined, {}))
+).toEqual( "object" )
+
+
+expect(
+	Reducer.devCount({ DEV_KNIGHT: 10, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0}, 
+		{type: "USE_DEV_CARD", card: "DEV_KNIGHT"}).DEV_KNIGHT
+).toEqual( 9 )
+
+expect(
+	Reducer.devCount({  DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 }, 
+		{type: "DRAW_DEV_CARD", userId: 1, rand: 0.001 })
+).toEqual({  DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 } )
+
+expect(
+	Reducer.devCount( undefined, {})
+).toEqual({  DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 })
+
+expect(
+	Reducer.devCount( Reducer.devCount(undefined, {}), {type: "DRAW_DEV_CARD", userId: 1, rand: 0.001 })
+).toEqual({  DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 })
+
 // ==========================================================================
 // ===========================  specs for player  ===========================
 expect(
@@ -138,23 +164,20 @@ expect(
 	}, {type: "USE_DEV_CARD", userId: 12, card: "DEV_KNIGHT"}).devUsedCount.DEV_KNIGHT
 ).toEqual( 1 )
 
-
-// ============================================================================
-// ===========================  specs for dev count  ============================
+// establish normal
 expect(
-	typeof(Reducer.devCount(undefined, {}))
-).toEqual( "object" )
+	Reducer.player( Object.assign( Reducer.player(undefined, {id: 123})), {}).devCount
+).toEqual( {DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
 
 
 expect(
-	Reducer.devCount({ DEV_KNIGHT: 10, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0}, 
-		{type: "USE_DEV_CARD", card: "DEV_KNIGHT"}).DEV_KNIGHT
-).toEqual( 9 )
+	Reducer.player( Object.assign( Reducer.player(undefined, {}), {id: 123}), {type: "DRAW_DEV_CARD", userId: 123, rand: 0.001}).devCount
+).toEqual( {DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
 
 expect(
-	Reducer.devCount({  DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 }, 
-		{type: "DRAW_DEV_CARD",  rand: 0.001 })
-).toEqual({  DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 } )
+	Reducer.player( Object.assign( Reducer.player(undefined, {}), {id: 123}), {type: "DRAW_DEV_CARD", userId: 111, rand: 0.001}).devCount
+).toEqual( {DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
+
 
 // ============================================================================
 // ===========================  specs for players  ============================
@@ -189,6 +212,19 @@ expect(
 		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
 	}], {type: "ADJUST_RESOURCES", WHEAT: -1, userId: 13})[0].resourceCount.WHEAT
 ).toEqual( 10 )
+
+
+let playerForPlayersTest1 = Object.assign( Reducer.player(undefined, {}), {id: 123})
+expect(
+	Reducer.players( [playerForPlayersTest1], {type: "DRAW_DEV_CARD", userId: 123, rand: 0.001})[0].devCount
+).toEqual( {DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
+
+
+let playerForPlayersTest2 = Object.assign( Reducer.player(undefined, {}), {id: 123})
+expect(
+	Reducer.players( [playerForPlayersTest2], {type: "DRAW_DEV_CARD", userId: 111, rand: 0.001})[0].devCount
+).toEqual( {DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
+
 
 // ============================================================================
 // =========================  specs for edgeContents  =========================
@@ -253,11 +289,11 @@ expect(
 	typeof(Reducer.game(undefined, {}))
 ).toEqual( "object" )
 
-let player = Reducer.player(undefined, {})
+let playerForGameTest0 = Reducer.player(undefined, {})
 
 expect(
-	Reducer.game({players: [ player ]}, {type: "ADJUST_RESOURCES", WHEAT: -1, userId: player.id}).players[0].resourceCount.WHEAT
-).toEqual( player.resourceCount.WHEAT - 1)
+	Reducer.game({players: [ playerForGameTest0 ]}, {type: "ADJUST_RESOURCES", WHEAT: -1, userId: playerForGameTest0.id}).players[0].resourceCount.WHEAT
+).toEqual( playerForGameTest0.resourceCount.WHEAT - 1)
 
 let defaultGame = Reducer.game(undefined, {})
 
@@ -268,6 +304,18 @@ expect(
 expect(
 	Reducer.game( Object.assign({}, defaultGame, {requireRobberMove: true }), {type: "MOVE_ROBBER"}).requireRobberMove
 ).toEqual( false )
+
+let playerForGameTest1 = Object.assign( Reducer.player(undefined, {}), {id: 123})
+let gamePriorForGameTest1 = Object.assign( Reducer.game(undefined, {}), {players: [ playerForGameTest1 ]})
+expect(
+	Reducer.game( gamePriorForGameTest1, {type: "DRAW_DEV_CARD", userId: 123, rand: 0.001}).players[0].devCount
+).toEqual( {DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
+
+let playerForGameTest2 = Object.assign( Reducer.player(undefined, {}), {id: 123})
+let gamePriorForGameTest2 = Object.assign( Reducer.game(undefined, {}), {players: [ playerForGameTest2 ]})
+expect(
+	Reducer.game( gamePriorForGameTest2, {type: "DRAW_DEV_CARD", userId: 111, rand: 0.001}).players[0].devCount
+).toEqual( {DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
 
 
 // console.log( Reducer.player( undefined, {}))

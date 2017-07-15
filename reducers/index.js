@@ -135,12 +135,12 @@ const player = ( state, action) => {
 		}
 	}
 	switch( action.type ) {
+		case "DRAW_DEV_CARD":
+			return action.userId == state.id ? Object.assign({}, state, {devCount: devCount( state.devCount, action) }) : state
 		case "ADJUST_RESOURCES":
 			return Object.assign({}, state, {resourceCount: resourceCount( state.resourceCount, action) })
 		case "USE_DEV_CARD":
 			return Object.assign({}, state, {devCount: devCount( state.devCount, action), devUsedCount: devUsedCount( state.devUsedCount, action) })
-		case "DRAW_DEV_CARD":
-			return Object.assign({}, state, {devCount: devCount( state.devCount, action) })
 		default:
 			return state
 	}	
@@ -154,7 +154,7 @@ const players = ( state, action) => {
 		let lastId = 0
 		
 		return houses.map((h) => {
-			return(Object.assign({}, player(undefined, {}), {
+			return(Object.assign(player(undefined, {}), {
 				id: lastId++,
 				name: h,
 				color: colors.shift()
@@ -325,7 +325,19 @@ const game = ( state, action ) => {
 				state, 
 				{ requireRobberMove: false }
 			);
-			
+		case "DRAW_DEV_CARD":
+			return Object.assign(
+				{}, 
+				state, 
+				{ players: players( state.players, action ) }
+			);
+		case "USE_DEV_CARD":
+			return Object.assign(
+				{}, 
+				state, 
+				{ players: players( state.players, action ) }
+			);
+		
 		default:
 			return state;
 	}

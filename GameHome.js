@@ -250,6 +250,13 @@ class GameHome extends Component {
 	}
 	
 
+	buyDevCard( userId ) {
+		// let state = this.this.context.store.getState()
+		
+		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId, rand: 0.001 })
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ORE: -1, WHEAT: -1, SHEEP: -1})
+		
+	}
 	
   render() {
 	  let state = this.context.store.getState()
@@ -309,6 +316,13 @@ class GameHome extends Component {
 	 				   color="#841584"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
+	 				 <Button
+	 				   onPress={ () => this.buyDevCard( this.userWithTurn().id ) }
+	 				   title="Buy Dev Card"
+	 				   color="#841584"
+	 				   accessibilityLabel="Learn more about this purple button"
+	 				 />
+
  			</View>
 						 
       </View>
