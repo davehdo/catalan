@@ -28,13 +28,11 @@ class User extends Component {
 	  
 	}
 
+	victoryPoints() {}
+	
   render() {
     return (
-		<View style={styles.container}>
-        
-
-
-      </View>
+		<View style={styles.container}></View>
     );
   }
 }

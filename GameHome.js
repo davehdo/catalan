@@ -231,7 +231,8 @@ class GameHome extends Component {
 		return Object.assign({
 			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 1).length,
 			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 2).length,
-			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length
+			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length,
+			victoryPoints: () => 1
 		}, this.context.store.getState().game.players.filter((e) => e.id == targetId)[0])
 	}  
 
@@ -243,7 +244,8 @@ class GameHome extends Component {
 		return Object.assign({
 			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 1).length,
 			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 2).length,
-			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length
+			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length,
+			victoryPoints: () => 1
 		}, player)
 	}
 	

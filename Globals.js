@@ -13,7 +13,7 @@ let resourceColorMap = {}
 
 resourceColorMap[DESERT] = "tan",
 resourceColorMap[ORE] = "silver",
-resourceColorMap[BRICK] = "darkred",
+resourceColorMap[BRICK] = "firebrick",
 resourceColorMap[LUMBER] = "forestgreen",
 resourceColorMap[SHEEP] = "lightgreen",
 resourceColorMap[WHEAT] = "gold"
