@@ -69,6 +69,59 @@ const resourceCount = (state, action) => {
 }
 
 
+const devCount = (state, action) => {
+	if( typeof( state ) == "undefined" ) {
+		let devCount = {}
+		Object.keys(Globals.devCards).map((v) => devCount[v] = 10)
+		return devCount
+	}
+
+	let newDevCount = {}	
+	switch( action.type ) {
+		case "DRAW_DEV_CARD": // rand, userId
+			let newDevCard 
+			if (action.rand < 14 / 25 ) {
+				newDevCard = Globals.DEV_KNIGHT
+			} else if (action.rand < 19 / 25 ) {
+				newDevCard = Globals.DEV_VP
+			} else if (action.rand < 21 / 25) {
+				newDevCard = Globals.DEV_ROAD
+			} else if (action.rand < 23 / 25) {
+				newDevCard = Globals.DEV_MONOPOLY
+			} else {
+				newDevCard = Globals.DEV_PLENTY
+			}
+			newDevCount[newDevCard] = (state[newDevCard] || 0) + 1
+			return Object.assign({}, state, newDevCount)
+		case "USE_DEV_CARD": // userId, card
+			newDevCount[action.card] = (state[action.card] || 0) - 1
+			return Object.assign({}, state, newDevCount)
+		default:
+			return state
+		
+	}
+}
+
+
+const devUsedCount = (state, action) => {
+	if( typeof( state ) == "undefined" ) {
+		let devCount = {}
+		Object.keys(Globals.devCards).map((v) => devCount[v] = 10)
+		return devCount
+	}
+
+	let newdevCount = {}	
+	switch( action.type ) {
+		case "USE_DEV_CARD": // userId, card
+			newdevCount[action.card] = (state[action.card] || 0) + 1
+			return Object.assign({}, state, newdevCount)
+		default:
+			return state
+		
+	}
+}
+
+
 // { type: "ADJUST_RESOURCES", userId, ORE: _, BRICK: _, LUMBER: _, SHEEP: _, WHEAT: _}
 const player = ( state, action) => {
 	if( typeof( state ) == "undefined" ) {
@@ -76,12 +129,18 @@ const player = ( state, action) => {
 			id: makeId(),
 			name: "Unnamed player",
 			color: "white",
-			resourceCount: resourceCount(undefined, {})
+			resourceCount: resourceCount(undefined, {}),
+			devCount: devCount(undefined, {}),
+			devUsedCount: devUsedCount(undefined, {})
 		}
 	}
 	switch( action.type ) {
 		case "ADJUST_RESOURCES":
 			return Object.assign({}, state, {resourceCount: resourceCount( state.resourceCount, action) })
+		case "USE_DEV_CARD":
+			return Object.assign({}, state, {devCount: devCount( state.devCount, action), devUsedCount: devUsedCount( state.devUsedCount, action) })
+		case "DRAW_DEV_CARD":
+			return Object.assign({}, state, {devCount: devCount( state.devCount, action) })
 		default:
 			return state
 	}	
@@ -106,6 +165,10 @@ const players = ( state, action) => {
 	
 	switch( action.type ) {
 		case "ADJUST_RESOURCES":
+			return state.map((p) => (p.id != undefined && p.id == action.userId) ? player(p, action) : p) 
+		case "USE_DEV_CARD":
+			return state.map((p) => (p.id != undefined && p.id == action.userId) ? player(p, action) : p) 
+		case "DRAW_DEV_CARD":
 			return state.map((p) => (p.id != undefined && p.id == action.userId) ? player(p, action) : p) 
 		
 		// case "BUILD_EDGE":
@@ -279,6 +342,8 @@ module.exports = {
 	edgeContents,
 	nodeContents,
 	hexagonContents,
+	devCount,
+	devUsedCount,
 	reducerMaster: combineReducers({
 		game,
 		map

@@ -179,7 +179,7 @@ class GameHome extends Component {
 			this.setState({message: undefined})	
 		}
 		// reward the players 
-		let winningHexagons = this.hexagonAll().filter((h) => h.number == newRoll)
+		let winningHexagons = this.hexagonAll().filter((h) => h.number == newRoll && !h.robber)
 		
 		winningHexagons.map((hex) => {
 			hex.adjacentNodes().map((node) => {
@@ -196,10 +196,15 @@ class GameHome extends Component {
 	}
 	
 	moveRobber(hexId) {
-		
+		let state = this.context.store.getState()
+		if (!state.game.requireRobberMove)
+			return false // end silently		
+		if (state.map.hexagonContents[hexId].robber)
+			return this.setState({message: "Must move robber to a different space"})
 		this.context.store.dispatch({ type: "MOVE_ROBBER", hexId: hexId})
 		this.setState({message: undefined})
 	}
+	
 	
 	endTurn() {
 		let state = this.context.store.getState()

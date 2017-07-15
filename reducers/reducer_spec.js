@@ -93,6 +93,64 @@ expect(
 		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
 	}, {type: "ADJUST_RESOURCES", WHEAT: -1}).resourceCount.WHEAT
 ).toEqual( 9 )
+//
+expect(
+	Reducer.player({
+		id: 12,
+		name: 'Unnamed player',
+		color: 'white',
+		devCount: { DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+		devUsedCount: { DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+	}, {type: "DRAW_DEV_CARD", userId: 12, rand: 0.001 }).devCount
+).toEqual( { DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
+
+expect(
+	Reducer.player({ 
+		id: 12,
+		name: 'Unnamed player',
+		color: 'white',
+		devCount: { DEV_KNIGHT: 10, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+		devUsedCount: { DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+	}, {type: "USE_DEV_CARD", userId: 12, card: "DEV_KNIGHT"}).devCount.DEV_KNIGHT
+).toEqual( 9 )
+
+expect(
+	Reducer.players([{ 
+		id: 12987,
+		name: 'Unnamed player',
+		color: 'white',
+		devCount: { DEV_KNIGHT: 10, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+		devUsedCount: { DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+	}], {type: "USE_DEV_CARD", userId: 12, card: "DEV_KNIGHT"})[0].devCount.DEV_KNIGHT
+).toEqual( 10 )
+
+expect(
+	Reducer.player({ 
+		id: 12,
+		name: 'Unnamed player',
+		color: 'white',
+		devCount: { DEV_KNIGHT: 10, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+		devUsedCount: { DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0},
+	}, {type: "USE_DEV_CARD", userId: 12, card: "DEV_KNIGHT"}).devUsedCount.DEV_KNIGHT
+).toEqual( 1 )
+
+
+// ============================================================================
+// ===========================  specs for dev count  ============================
+expect(
+	typeof(Reducer.devCount(undefined, {}))
+).toEqual( "object" )
+
+
+expect(
+	Reducer.devCount({ DEV_KNIGHT: 10, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0}, 
+		{type: "USE_DEV_CARD", card: "DEV_KNIGHT"}).DEV_KNIGHT
+).toEqual( 9 )
+
+expect(
+	Reducer.devCount({  DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 }, 
+		{type: "DRAW_DEV_CARD",  rand: 0.001 })
+).toEqual({  DEV_KNIGHT: 1, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0 } )
 
 // ============================================================================
 // ===========================  specs for players  ============================
