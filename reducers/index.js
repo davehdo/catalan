@@ -72,7 +72,7 @@ const resourceCount = (state, action) => {
 const devCount = (state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let devCount = {}
-		Object.keys(Globals.devCards).map((v) => devCount[v] = 10)
+		Object.keys(Globals.devCards).map((v) => devCount[v] = 0)
 		return devCount
 	}
 
@@ -106,7 +106,7 @@ const devCount = (state, action) => {
 const devUsedCount = (state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let devCount = {}
-		Object.keys(Globals.devCards).map((v) => devCount[v] = 10)
+		Object.keys(Globals.devCards).map((v) => devCount[v] = 0)
 		return devCount
 	}
 
@@ -154,12 +154,11 @@ const players = ( state, action) => {
 		let lastId = 0
 		
 		return houses.map((h) => {
-			return({
+			return(Object.assign({}, player(undefined, {}), {
 				id: lastId++,
 				name: h,
-				color: colors.shift(),
-				resourceCount: resourceCount(undefined, {})
-			})
+				color: colors.shift()
+			}))
 		})		
 	}
 	

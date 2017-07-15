@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import {
-  AppRegistry,
+  // AppRegistry,
   StyleSheet,
   Text,
   View,
@@ -17,9 +17,12 @@ const Card = (props) => {
 				<View style={ styles.cardOuter }>
 					<View style={{ backgroundColor: props.color, flex: 1 }}></View>
 		 		</View>
-				<View style={styles.circle}>
+				<View style={styles.bottomRightCircle}>
 					<Text style={{ backgroundColor: "transparent", color: "white", fontSize: 10}}>{ props.count }</Text>
 				</View>
+				{ props.countUsed ? <View style={styles.upperLeftCircle}>
+					<Text style={{ backgroundColor: "transparent", color: "white", fontSize: 10}}>{ props.countUsed }</Text>
+				</View> : <View />}
 			</View>
 }
 
@@ -32,8 +35,7 @@ class UserAssetsShow extends Component {
 
   render() {
     return (
-			<View style={{ flexDirection: "row", padding: 10}}>						 
-				 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }}>
+				 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", padding: 10 }}>
 						<View style={{ flex: 2}}>
 
 						 	<Text style={styles.smallStats}>S { this.props.user.nSettlements() }/{Globals.maxSettlements}</Text>
@@ -41,11 +43,19 @@ class UserAssetsShow extends Component {
 						 	<Text style={styles.smallStats}>R { this.props.user.nRoads() }/{Globals.maxRoads}</Text>
 						 	<Text style={styles.smallStats}>VP { this.props.user.victoryPoints() }</Text>
 						</View>
-			 			<View style={{ flex: 4, flexDirection: "row"}}> 
-						 { Globals.resourceCardColorMapArray.map((e) => <Card key={ e[1] } count={ this.props.user.resourceCount[e[0]]} color={ e[1]}/>)}
+			 			<View style={{ flex: 4}}> 
+							<View style={{flexDirection: "row", marginBottom: 10}} >						 
+						 		{ Globals.resourceCardColorMapArray.map((e) => 
+									<Card key={ e[1] } count={ this.props.user.resourceCount[e[0]]} color={ e[1]}/>)
+								}
+						 	</View>
+							<View style={{flexDirection: "row"}} >
+						 		{ Object.keys(Globals.devCards).map((e) => 
+									<Card key={ e } count={ this.props.user.devCount[e]} countUsed={ this.props.user.devUsedCount[e]} color={ "black"}/>)
+								}
+						 	</View>
 						</View>
 				 </View>
-			</View>
     );
   }
 }
@@ -53,7 +63,8 @@ class UserAssetsShow extends Component {
 const nodeDiameter = 20
 var styles = StyleSheet.create({
 	cardOuter: {
-		backgroundColor: "whitesmoke", padding: 6, margin: 4, 
+		margin: 6, 
+		backgroundColor: "whitesmoke", padding: 6, 
 		borderRadius: 3, 
 		height: 45, width: 33
 	},
@@ -68,7 +79,7 @@ var styles = StyleSheet.create({
      textAlign: 'center',
      color: '#656565'
    },
-	circle: {
+	bottomRightCircle: {
 		alignItems: "center",
 		justifyContent: "center",
 		position: "absolute",
@@ -78,6 +89,18 @@ var styles = StyleSheet.create({
 		backgroundColor: '#cc0000',
 		right:  0,
 		bottom: 0,
+		
+	},
+	upperLeftCircle: {
+		alignItems: "center",
+		justifyContent: "center",
+		position: "absolute",
+		width: nodeDiameter,
+		height: nodeDiameter,
+		borderRadius: nodeDiameter / 2.0,
+		backgroundColor: '#333',
+		left:  0,
+		left: 0,
 		
 	},
 });

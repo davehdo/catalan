@@ -82,6 +82,10 @@ expect(
 ).toEqual( "object" )
 
 expect(
+	typeof(Reducer.player(undefined, {}).devCount)
+).toEqual( "object" )
+
+expect(
 	Reducer.player(undefined, {}).id 
 ).toNotEqual( undefined )
 
