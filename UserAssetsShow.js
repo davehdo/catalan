@@ -15,7 +15,9 @@ const Globals = require("./Globals.js")
 const Card = (props) => {
 	return <View>
 				<View style={ styles.cardOuter }>
-					<View style={{ backgroundColor: props.color, flex: 1 }}></View>
+					<View style={{ backgroundColor: props.color, flex: 1, justifyContent: "center", alignItems: "center" }}>
+						<Text style={{ fontSize: 8, color: "white"}}>{ props.symbol }</Text>
+					</View>
 		 		</View>
 				<View style={styles.bottomRightCircle}>
 					<Text style={{ backgroundColor: "transparent", color: "white", fontSize: 10}}>{ props.count }</Text>
@@ -50,8 +52,13 @@ class UserAssetsShow extends Component {
 								}
 						 	</View>
 							<View style={{flexDirection: "row"}} >
-						 		{ Object.keys(Globals.devCards).map((e) => 
-									<Card key={ e } count={ this.props.user.devCount[e]} countUsed={ this.props.user.devUsedCount[e]} color={ "black"}/>)
+						 		{ Object.keys(Globals.devCards)
+									.filter((e) => this.props.user.devCount[e] > 0 && this.props.user.devCount[e] > 0)
+									.map((e) => 
+									<Card key={ e } count={ this.props.user.devCount[e]} 
+										countUsed={ this.props.user.devUsedCount[e]} 
+										symbol={ Globals.devCardSymbols[e] }
+										color={ "black"}/>)
 								}
 						 	</View>
 						</View>

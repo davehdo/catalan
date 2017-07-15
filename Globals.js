@@ -47,6 +47,7 @@ module.exports = {
 	resources: { WHEAT, SHEEP, LUMBER, BRICK, ORE, DESERT },	
 	resourceCards: { WHEAT, SHEEP, LUMBER, BRICK, ORE },
 	devCards: {DEV_KNIGHT, DEV_VP, DEV_ROAD, DEV_MONOPOLY, DEV_PLENTY},
+	devCardSymbols: {DEV_KNIGHT: "Kn", DEV_VP: "VP", DEV_ROAD: "Rd", DEV_MONOPOLY: "Mo", DEV_PLENTY: "Pl"},
 	DEV_KNIGHT, 
 	DEV_VP, 
 	DEV_ROAD, 

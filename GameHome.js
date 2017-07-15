@@ -253,7 +253,7 @@ class GameHome extends Component {
 	buyDevCard( userId ) {
 		// let state = this.this.context.store.getState()
 		
-		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId, rand: 0.001 })
+		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId, rand: Math.random() })
 		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ORE: -1, WHEAT: -1, SHEEP: -1})
 		
 	}
