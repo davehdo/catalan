@@ -49,6 +49,7 @@ class WorldMap extends Component {
 					{ Globals.hexagons.map((e) => 
 						<Hexagon key={`hex_${e.index}`} 
 							highlight={ this.props.highlightNumber == hexagonContents[e.index].number }
+							onPress={ () => this.props.onPressHexagon(e.index) }
 							{...e}
 							{...hexagonContents[e.index]} />
 					)}

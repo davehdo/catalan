@@ -161,39 +161,56 @@ class GameHome extends Component {
 
 
 	rollDice() {
-		if (this.context.store.getState().game.thisTurnRolled) {
-			this.setState({message: "Already rolled this turn"})
-		} else {
-			let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
-			// this.props.worldMap.highlightNumber = newRoll
-			this.context.store.dispatch({ type: "ROLL", rollValue: newRoll })
-			this.setState({message: undefined})
-			
-			// reward the players 
-			let winningHexagons = this.hexagonAll().filter((h) => h.number == newRoll)
-			
-			winningHexagons.map((hex) => {
-				hex.adjacentNodes().map((node) => {
-					if (node.buildingType) {
-						let action = {type: "ADJUST_RESOURCES", userId: node.userId}
-						action[ hex.resource ] = node.buildingType
-						this.context.store.dispatch(action)
-					}
-					
-				})
+		let state = this.context.store.getState()
+		if (state.game.requireRobberMove)
+			return this.setState({message: "Robber move required"})			
+		if (state.game.thisTurnRolled) 
+			return this.setState({message: "Already rolled this turn"})
+		
+		let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
+		// this.props.worldMap.highlightNumber = newRoll
+		this.context.store.dispatch({ type: "ROLL", rollValue: newRoll })
+		
+		
+		if (newRoll == 7) {
+			this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"})
+			this.setState({message: "Move the robber by tapping a hexagon"})
+		} else {			
+			this.setState({message: undefined})	
+		}
+		// reward the players 
+		let winningHexagons = this.hexagonAll().filter((h) => h.number == newRoll)
+		
+		winningHexagons.map((hex) => {
+			hex.adjacentNodes().map((node) => {
+				if (node.buildingType) {
+					let action = {type: "ADJUST_RESOURCES", userId: node.userId}
+					action[ hex.resource ] = node.buildingType
+					this.context.store.dispatch(action)
+				}
 				
 			})
-		}			
+			
+		})
+				
+	}
+	
+	moveRobber(hexId) {
+		
+		this.context.store.dispatch({ type: "MOVE_ROBBER", hexId: hexId})
+		this.setState({message: undefined})
 	}
 	
 	endTurn() {
-		if (this.context.store.getState().game.thisTurnRolled) {
-			this.context.store.dispatch({ type: "END_TURN" })
-			this.setState({message: undefined})
+		let state = this.context.store.getState()
+		if (state.game.requireRobberMove)
+			return this.setState({message: "Robber move required"})			
+		if (state.game.thisTurnRolled == undefined) 
+			return this.setState({message: "Must roll first"})
 			
-		} else {
-			this.setState({message: "Must roll first"})
-		}			
+		this.context.store.dispatch({ type: "END_TURN" })
+		this.setState({message: undefined})
+			
 	}
 	
 	userById( userId ) {
@@ -264,6 +281,7 @@ class GameHome extends Component {
 	 			highlightNumber={ state.game.thisTurnRolled }
 	 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().id, nodeId: id } )}
 				onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().id, edgeId: id } )} 
+				onPressHexagon={ (id) => this.moveRobber(id)} 
 				userById={ (id) => this.userById(id) }
 				map={ state.map } />
 			

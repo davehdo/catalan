@@ -141,14 +141,16 @@ class Hexagon extends Component {
 	
 	render() {
 	    return (
-	      <View key={ `hex_${this.props.index}` } style={this.styles.hexagon}>
+		<TouchableOpacity key={`hex_${ this.props.index }`} onPress={ this.props.onPress }>
+	      <View  style={this.styles.hexagon}>
 				<View style={this.styles.hexagonInner} />
 				<View style={this.styles.hexagonBefore} />
 				<View style={this.styles.hexagonAfter} />
 			 <View style={{ position: "absolute"}}>
-				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
+				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }{ this.props.robber ? "*" : ""}</Text>
 			 </View>
 	      </View>
+		</TouchableOpacity>
 	    )
 	  }
 	  

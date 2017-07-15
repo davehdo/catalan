@@ -165,9 +165,7 @@ const edgeContents = (state, action) => {
 	
 }
 
-// { type: "BUILD_EDGE", userId: _, edgeId: _ }
-// { type: "BUILD_NODE", userId: _, nodeId: _ }
-const map = (state, action) => {
+const hexagonContents = (state, action) => {
 	if( typeof(state) == "undefined") {
 		let numbers = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
 		let resources = shuffle(Globals.resourceDeck) //.sort((r)=> r ? Math.random() : 0)
@@ -177,12 +175,34 @@ const map = (state, action) => {
 			hexagonContents[i] = ({
 				resource: r,
 				number: (r == Globals.resources.DESERT) ? undefined : numbers.shift(),
+				robber: r == Globals.resources.DESERT
 			})
 		})
+		
+		return hexagonContents
+	}
+	
+	switch( action.type ) {
+		case "MOVE_ROBBER":
+			
+			let update = {}
+			Object.keys( state ).map((k) => {
+				update[k] = Object.assign({}, state[k], {robber: k == action.hexId}) 
+			})
+			return Object.assign({}, state, update )
+		default:
+			return state
+	}
 
-	//
+	
+}
+// { type: "BUILD_EDGE", userId: _, edgeId: _ }
+// { type: "BUILD_NODE", userId: _, nodeId: _ }
+// { type: "MOVE_ROBBER", hexId: _ }
+const map = (state, action) => {
+	if( typeof(state) == "undefined") {
 		return {
-			hexagonContents,
+			hexagonContents: hexagonContents( undefined, {}),
 			nodeContents: nodeContents(undefined, {}),
 			edgeContents: edgeContents(undefined, {})
 		}
@@ -193,6 +213,8 @@ const map = (state, action) => {
 			return Object.assign({}, state, {edgeContents: edgeContents( state.edgeContents, action)})
 		case "BUILD_NODE":
 			return Object.assign({}, state, {nodeContents: nodeContents( state.nodeContents, action)})
+		case "MOVE_ROBBER":
+			return Object.assign({}, state, {hexagonContents: hexagonContents( state.hexagonContents, action)})
 		default:
 			return state
 	}
@@ -207,7 +229,8 @@ const game = ( state, action ) => {
 			players: players(undefined, {}), 
 			round: 0, 
 			turn: 0,
-			thisTurnRolled: undefined
+			thisTurnRolled: undefined,
+			requireRobberMove: false
 		}
 	switch( action.type ) {
 		case "END_TURN":
@@ -228,6 +251,18 @@ const game = ( state, action ) => {
 				state, 
 				{ players: players( state.players, action) }
 			);
+		case "REQUIRE_ROBBER_MOVE":
+			return Object.assign(
+				{}, 
+				state, 
+				{ requireRobberMove: true }
+			);
+		case "MOVE_ROBBER":
+			return Object.assign(
+				{}, 
+				state, 
+				{ requireRobberMove: false }
+			);
 			
 		default:
 			return state;
@@ -243,6 +278,7 @@ module.exports = {
 	players,
 	edgeContents,
 	nodeContents,
+	hexagonContents,
 	reducerMaster: combineReducers({
 		game,
 		map

@@ -159,6 +159,22 @@ expect(
 ).toEqual( {100: { userId: 99, buildingType: 1 }, 70: { userId: 99, buildingType: 1 } } )
 
 
+// ============================================================================
+// ==========================  specs for hexagonContents  ========================
+expect(
+	typeof(Reducer.hexagonContents(undefined, {}))
+).toEqual( "object")
+
+expect(
+	Reducer.hexagonContents({10: {resource: "WHEAT", number: 4, robber: false }}, {type: "MOVE_ROBBER", hexId: 10})
+).toEqual( {10: {resource: "WHEAT", number: 4, robber: true }})
+
+expect(
+	Reducer.hexagonContents({10: {resource: "WHEAT", number: 4, robber: true }}, {type: "MOVE_ROBBER", hexId: 7})
+).toEqual( {10: {resource: "WHEAT", number: 4, robber: false }})
+
+
+
 
 // ============================================================================
 // =============================  specs for map  ==============================
@@ -180,6 +196,16 @@ let player = Reducer.player(undefined, {})
 expect(
 	Reducer.game({players: [ player ]}, {type: "ADJUST_RESOURCES", WHEAT: -1, userId: player.id}).players[0].resourceCount.WHEAT
 ).toEqual( player.resourceCount.WHEAT - 1)
+
+let defaultGame = Reducer.game(undefined, {})
+
+expect(
+	Reducer.game( Object.assign({}, defaultGame, {requireRobberMove: false }), {type: "REQUIRE_ROBBER_MOVE"}).requireRobberMove
+).toEqual( true )
+
+expect(
+	Reducer.game( Object.assign({}, defaultGame, {requireRobberMove: true }), {type: "MOVE_ROBBER"}).requireRobberMove
+).toEqual( false )
 
 
 // console.log( Reducer.player( undefined, {}))
