@@ -1,9 +1,8 @@
 'use strict';
 
-
 import React, { Component } from 'react';
 import {
-  AppRegistry,
+  // AppRegistry,
   StyleSheet,
   Text,
   View,
@@ -11,67 +10,20 @@ import {
 } from 'react-native';
 
 const Globals = require("./Globals.js")
-
-
-// const NodeShow = require('./NodeShow.js');
-
 const nodeDiameter = 30
+const settlementWidth = 55
+const cityWidth = 80
 
 
 class Node extends Component{
 	constructor(props) {
-		super(props);
-// userId
-// buildingType
-		
-		// this.state = {
-		// 	contents: this.props.buildingType, // 1 is a settlement and 2 is a city
-		// 	ownedByUser: this.props.userId
-		// }
-		// index will be like 061 or -061
-		// 061 -> should be separated to 06 and 1
-		// -061 -> should be separated to -06 and 1
-		// this.indexSign = this.props.index > 0 ? 1 : -1
-		// this.indexTens = this.indexSign * Math.floor( Math.abs(this.props.index) / 10.0)
-		// this.indexOnes = Math.abs(this.props.index) % 10.0
-		//
-		// this.rotation = {
-		// 	0: 90,
-		// 	1: 30,
-		// }[ this.indexOnes ]
-		//
-		
+		super(props); // x, y, buildingType, userId
+
 		this.coordinates = {x: this.props.x, y: this.props.y} || {x: 0, y: 0}
 		
-		
-		this.styles = {
-			circle: {
-				position: "absolute",
-				width: nodeDiameter,
-				height: nodeDiameter,
-				borderRadius: nodeDiameter / 2.0,
-				backgroundColor: 'brown',
-				left:  -nodeDiameter / 2,
-				top: -nodeDiameter / 2,
-				
-			}
-		}
 	}
 	
-	get adjacentNodes() {
-		return this.props.nodesWithinRadius( this, 1 / Math.sqrt( 3 ) )
-	}
-	
-	get adjacentHexagons() {
-		return this.props.hexagonsWithinRadius( this, 1 / Math.sqrt( 3 ) )
-	}
-	
-	get adjacentEdges() {
-		return this.props.edgesWithinRadius( this, 0.5 / Math.sqrt( 3 ) )
-	}
-	
-	
-	displayContents() {
+	displayName() {
 		switch( this.props.buildingType ) {
 			case 1: 
 				return "Settlement"
@@ -83,8 +35,6 @@ class Node extends Component{
 				return "Empty lot"
 		}
 	}
-	
-	
 	
 	shape() {
 		let color = this.props.owner ? this.props.owner.color : "white"
@@ -100,7 +50,6 @@ class Node extends Component{
 			      </View>
 				break;
 			case 2:
-
 				return <View key={ `n_${this.props.index}` } transform={[
 					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
@@ -108,33 +57,35 @@ class Node extends Component{
 				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonInner), {backgroundColor: color})} />
 				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonBefore), {borderBottomColor: color})} />
 				      </View>
-
-				
 				break;
 			default:
 				return <View key={ `n_${this.props.index}` } transform={[
 					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
 					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
-				]} style={this.styles.circle} />
-				
+				]} style={ styles.circle} />
 		}
 	}
 	
-	
-	render() {
-		
+	render() {	
 		return (
-			<TouchableOpacity key={`node_${ this.props.index }`} onPress={ this.props.onPress }>
+			<TouchableOpacity key={`node_${ this.props.index }`} onPress={ this.props.onPress	 }>
 				{ this.shape() }
 			</TouchableOpacity>
 		)
 	}
 }
 
-const settlementWidth = 55
-const cityWidth = 80
-
 const styles = StyleSheet.create({
+	circle: {
+		position: "absolute",
+		width: nodeDiameter,
+		height: nodeDiameter,
+		borderRadius: nodeDiameter / 2.0,
+		backgroundColor: 'brown',
+		left:  -nodeDiameter / 2,
+		top: -nodeDiameter / 2,
+		
+	},
    settlement: {
 	  position: "absolute",
 		left: -50 / 100 * settlementWidth,
