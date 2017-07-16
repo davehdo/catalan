@@ -292,7 +292,8 @@ const game = ( state, action ) => {
 			round: 0, 
 			turn: 0,
 			thisTurnRolled: undefined,
-			requireRobberMove: false
+			requireRobberMove: false,
+			roadBuildingCredits: 0
 		}
 	switch( action.type ) {
 		case "END_TURN":
@@ -325,21 +326,24 @@ const game = ( state, action ) => {
 				state, 
 				{ requireRobberMove: false }
 			);
-		case "DRAW_DEV_CARD":
+		case "REDEEM_ROAD_CREDIT":
 			return Object.assign(
 				{}, 
 				state, 
-				{ players: players( state.players, action ) }
-			);
+				{ roadBuildingCredits: state.roadBuildingCredits - 1 }
+			);			
 		case "USE_DEV_CARD":
 			return Object.assign(
 				{}, 
 				state, 
+				{ roadBuildingCredits: state.roadBuildingCredits + (action.card == "DEV_ROAD" ? 2 : 0), players: players( state.players, action ) }
+			);
+		default:
+			return Object.assign(
+				{}, 
+				state, 
 				{ players: players( state.players, action ) }
 			);
-		
-		default:
-			return state;
 	}
 }
 

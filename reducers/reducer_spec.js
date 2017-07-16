@@ -317,6 +317,18 @@ expect(
 	Reducer.game( gamePriorForGameTest2, {type: "DRAW_DEV_CARD", userId: 111, rand: 0.001}).players[0].devCount
 ).toEqual( {DEV_KNIGHT: 0, DEV_VP: 0, DEV_ROAD: 0, DEV_MONOPOLY: 0, DEV_PLENTY: 0} )
 
+// give two road building credits
+expect(
+	Reducer.game(  Object.assign( Reducer.game(undefined, {})), {type: "USE_DEV_CARD", userId: 111, card: "DEV_ROAD"}).roadBuildingCredits 
+).toEqual( 2 )
+
+expect(
+	Reducer.game(  Object.assign( Reducer.game(undefined, {}), {roadBuildingCredits: 2}), 
+	{type: "REDEEM_ROAD_CREDIT"}).roadBuildingCredits 
+).toEqual( 1 )
+
+
+
 
 // console.log( Reducer.player( undefined, {}))
 console.log( "Tests passed ")
