@@ -41,7 +41,7 @@ class WorldMap extends Component {
 		//this.props ? this.props.onPressNode : () => {} 
 		return(
 			<View style={{ backgroundColor: "lightblue", flexDirection: "row"  }}>
-				<View style={{flex: 1 }}></View>
+				<View style={{flex: 1}}></View>
 
 				<View style={{flex: 1, marginTop: MapHeight / 2, height: MapHeight / 2 }} >
 					<View transform={[{scaleX: 0.3}, {scaleY: 0.3}]} style={{ position: "absolute"}}>

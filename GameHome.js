@@ -7,7 +7,8 @@ import {
 	Text,
 	View,
 	TouchableOpacity,
-	Button
+	Button,
+	ScrollView
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
@@ -266,7 +267,7 @@ class GameHome extends Component {
 	  
     return (
 		<View style={styles.container}>
-        
+      	
 			<View style={{ flexDirection: "row", justifyContent: "flex-start", padding: 10, backgroundColor: "tan" }}>
 			 	<View style={{ backgroundColor: turnOfUser.color, height: 50, width: 50 }} />
 
@@ -293,35 +294,36 @@ class GameHome extends Component {
 			 	</View>
 			</View>
 			
-			<WorldMap 
-	 			highlightNumber={ state.game.thisTurnRolled }
-	 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().props.id, nodeId: id } )}
-				onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().props.id, edgeId: id } )} 
-				onPressHexagon={ (id) => this.moveRobber(id)} 
-				userById={ (id) => this.userById(id) }
-				map={ state.map } />
+			<ScrollView contentContainerStyle={{ top: -60 }}>
+					<WorldMap 
+			 			highlightNumber={ state.game.thisTurnRolled }
+			 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().props.id, nodeId: id } )}
+						onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().props.id, edgeId: id } )} 
+						onPressHexagon={ (id) => this.moveRobber(id)} 
+						userById={ (id) => this.userById(id) }
+						map={ state.map } />
 			
-			
-			<UserAssetsShow user={ this.signedInUser() }/>
-				
- 			<View style={{ flexDirection: "row", backgroundColor: "tan", padding: 10}}>
+					<UserAssetsShow user={ this.signedInUser() }/>
+			</ScrollView>
+					
+ 			<View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "black", padding: 10}}>
 	 				 <Button
 	 				   onPress={() => this.endTurn()}
 	 				   title="End my turn"
-	 				   color="#841584"
+	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 					
 	 				 <Button
 	 				   onPress={ () => this.rollDice() }
 	 				   title="Roll"
-	 				   color="#841584"
+	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 	 				 <Button
 	 				   onPress={ () => this.buyDevCard( this.userWithTurn().props.id ) }
 	 				   title="Buy Dev Card"
-	 				   color="#841584"
+	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 
@@ -358,9 +360,9 @@ var styles = StyleSheet.create({
   container: {
 	 flex: 1,
     // padding: 10,
-    marginTop: 65,
-    alignItems: 'center',
-	  backgroundColor: "tan"
+    marginTop: 65, // to offset the nav at the top
+    alignItems: 'stretch', // stretches to 100% width (cross-axis)
+	 backgroundColor: "tan"
   }
 });
 
