@@ -237,10 +237,15 @@ class GameHome extends Component {
 	
 
 	buyDevCard( userId ) {
-		// let state = this.this.context.store.getState()
-		
+		let state = this.context.store.getState()
+		let cost = { ORE: -1, WHEAT: -1, SHEEP: -1 }
+		if (state.game.requireRobberMove)
+			return this.setState({message: "Robber move required"})			
+		if (!this.userWithTurn().canAfford( cost ))
+			return this.setState({message: "Not enough resources to buy this"})
+			
 		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId, rand: Math.random() })
-		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ORE: -1, WHEAT: -1, SHEEP: -1})
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...cost})
 		
 	}
 	
@@ -256,7 +261,7 @@ class GameHome extends Component {
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
-						( turnOfUser == this.signedInUser() ) ?
+						( this.signedInUser().props.id == this.userWithTurn().props.id ) ?
 					<Text style={styles.description}>
 						 { turnOfUser.name }, its your turn{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled}. Tap map to build` : "Roll dice"}

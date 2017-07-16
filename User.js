@@ -48,6 +48,11 @@ class User extends Component {
 		return this.nSettlements() + 2 * this.nCities() + this.props.devCount[ Globals.DEV_VP ]
 	}
 	
+	canAfford( price ) {
+		// console.log( Object.values( price ).map((p) => (price[p] || 0) + (this.props.resourceCount[p] || 0)  )  )
+		return Object.keys( price ).filter((p) => price[p] + this.props.resourceCount[p] < 0).length == 0
+	}
+	
   render() {
     return (
 		<View style={styles.container}></View>
