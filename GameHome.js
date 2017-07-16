@@ -17,7 +17,7 @@ const NodeShow = require('./NodeShow');
 const User = require('./User.js');
 const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
-
+const DevCardShow = require("./DevCardShow.js")
 
 class GameHome extends Component {
 	constructor(props) {
@@ -60,7 +60,7 @@ class GameHome extends Component {
 		if (edge.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0 &&
 				edge.adjacentNodes().filter((e) => e.buildingType && e.userId == userId).length == 0)
 			return this.setState({message: "Warning: no adjacent road/building"})
-		if (this.userWithTurn().nRoads() >= Globals.maxRoads)
+		if (User.withTurn({store: this.context.store}).nRoads() >= Globals.maxRoads)
 			return this.setState({message: "No road pieces remain"})
 			
 		// cannot build through someones building
@@ -99,18 +99,18 @@ class GameHome extends Component {
 		if (node && node.buildingType == 1)	{
 			// upgrade settlement to city
 			price = {ORE: -2, WHEAT: -3}
-			if (!this.userWithTurn().canAfford( price ))
+			if (!User.withTurn({store: this.context.store}).canAfford( price ))
 				return this.setState({message: "Not enough resources to build city"})
-			if (this.userWithTurn().nCities() >= Globals.maxCities)
+			if (User.withTurn({store: this.context.store}).nCities() >= Globals.maxCities)
 				return this.setState({message: "Max cities reached"})	
 			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...price})
 		} else {
 			// build a settlement
 			price = {LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1}
-			if (!this.userWithTurn().canAfford( price ))
+			if (!User.withTurn({store: this.context.store}).canAfford( price ))
 				return this.setState({message: "Not enough resources to build settlement"})
-			if (this.userWithTurn().nSettlements() >= Globals.maxSettlements)
+			if (User.withTurn({store: this.context.store}).nSettlements() >= Globals.maxSettlements)
 				return this.setState({message: "Max settlements reached"})	
 			
 			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
@@ -129,14 +129,6 @@ class GameHome extends Component {
 		}, h, hexagonContents[h.index]))
 	}
 
-	// hexagonFind( arr_or_id ) {
-	// 	if (typeof(arr_or_id) == "Array") {
-	// 		return arr_or_id.map((id) => this.hexagonAll().filter((e) => e.index == id)[0])
-	// 	} else {
-	// 		return this.hexagonAll().filter((e) => e.index == arr_or_id)[0]
-	// 	}
-	// }
-	
 	edgeAll() {
 		let edgeContents = this.context.store.getState().map.edgeContents
 		return Globals.edges.map((h) => Object.assign({ 
@@ -230,22 +222,6 @@ class GameHome extends Component {
 			
 	}
 	
-	userById( userId ) {
-		let players = this.context.store.getState().game.players
-		return new User({store: this.context.store, ...(players.filter((p) => p.id == userId)[0] )})
-	}
-	
-	signedInUser() {
-		let targetId = 0 // = signedInId  this is temporary
-		return new User({store: this.context.store, ...this.context.store.getState().game.players.filter((e) => e.id == targetId)[0]})
-	}  
-
-	userWithTurn() {
-		let state = this.context.store.getState()
-		let player = state.game.players[state.game.turn]
-		
-		return new User({store: this.context.store, ...player})
-	}
 	
 
 	buyDevCard( userId ) {
@@ -253,11 +229,56 @@ class GameHome extends Component {
 		let cost = { ORE: -1, WHEAT: -1, SHEEP: -1 }
 		if (state.game.requireRobberMove)
 			return this.setState({message: "Robber move required"})			
-		if (!this.userWithTurn().canAfford( cost ))
+		if (!User.withTurn({store: this.context.store}).canAfford( cost ))
 			return this.setState({message: "Not enough resources to buy this"})
 			
 		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId, rand: Math.random() })
 		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...cost})
+		
+	}
+	
+	onPressDevCard( card, user ) {
+		// this.setState({message: `Pressed ${ card }`})
+		
+		switch( card.id ) {
+		case "DEV_KNIGHT":
+			this.props.navigator.push({
+				title: 'Development Card',
+				component: DevCardShow,
+				passProps: {card: card, onPressPlay: () => {
+					this.props.navigator.shift()
+				}}
+			});
+		
+		case "DEV_VP":
+			this.props.navigator.push({
+				title: 'Development Card',
+				component: DevCardShow,
+				passProps: {card: card, onPressPlay: () => {
+					this.props.navigator.shift()
+				}}
+			});
+		
+			
+		case "DEV_ROAD":
+			this.props.navigator.push({
+				title: 'Development Card',
+				component: DevCardShow,
+				passProps: {card: card, onPressPlay: () => {
+					this.props.navigator.shift()
+				}}
+			});
+		
+			
+		case "DEV_MONOPOLY":
+			return false
+			
+		case "DEV_PLENTY":
+			return false
+			
+		default: 
+			return false
+		}
 		
 	}
 	
@@ -273,7 +294,7 @@ class GameHome extends Component {
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
-						( this.signedInUser().props.id == this.userWithTurn().props.id ) ?
+						( User.signedIn({store: this.context.store}).props.id == User.withTurn({store: this.context.store}).props.id ) ?
 					<Text style={styles.description}>
 						 { turnOfUser.name }, its your turn{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled}. Tap map to build` : "Roll dice"}
@@ -297,13 +318,13 @@ class GameHome extends Component {
 			<ScrollView contentContainerStyle={{ top: -60 }}>
 					<WorldMap 
 			 			highlightNumber={ state.game.thisTurnRolled }
-			 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().props.id, nodeId: id } )}
-						onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().props.id, edgeId: id } )} 
+			 			onPressNode={ (id) => this.buildNode( {userId: User.withTurn({store: this.context.store}).props.id, nodeId: id } )}
+						onPressEdge={ (id) => this.buildRoad( {userId: User.withTurn({store: this.context.store}).props.id, edgeId: id } )} 
 						onPressHexagon={ (id) => this.moveRobber(id)} 
 						userById={ (id) => this.userById(id) }
 						map={ state.map } />
 			
-					<UserAssetsShow user={ this.signedInUser() }/>
+						<UserAssetsShow user={ User.signedIn({store: this.context.store}) } onPressDevCard={ (c) => this.onPressDevCard(c, User.signedIn({store: this.context.store}))  }/>
 			</ScrollView>
 					
  			<View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "black", padding: 10}}>
@@ -321,7 +342,7 @@ class GameHome extends Component {
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 	 				 <Button
-	 				   onPress={ () => this.buyDevCard( this.userWithTurn().props.id ) }
+	 				   onPress={ () => this.buyDevCard( User.withTurn({store: this.context.store}).props.id ) }
 	 				   title="Buy Dev Card"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"

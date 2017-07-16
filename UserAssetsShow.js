@@ -6,27 +6,13 @@ import {
   StyleSheet,
   Text,
   View,
-	// TouchableOpacity,
+	TouchableOpacity,
 	// Button
 } from 'react-native';
 
 const Globals = require("./Globals.js")
+const Card = require("./Card.js")
 
-const Card = ({color, symbol, count, countUsed }) => {
-	return <View>
-				<View style={ styles.cardOuter }>
-					<View style={{ backgroundColor: color, flex: 1, justifyContent: "center", alignItems: "center" }}>
-						<Text style={{ fontSize: 8, color: "white"}}>{ symbol }</Text>
-					</View>
-		 		</View>
-				<View style={styles.bottomRightCircle}>
-					<Text style={{ backgroundColor: "transparent", color: "white", fontSize: 10}}>{ count }</Text>
-				</View>
-				{ countUsed ? <View style={styles.upperLeftCircle}>
-					<Text style={{ backgroundColor: "transparent", color: "white", fontSize: 10}}>{ countUsed }</Text>
-				</View> : <View />}
-			</View>
-}
 
 const Award = (props) => {
 		return <View style={ styles.award }>
@@ -62,13 +48,16 @@ class UserAssetsShow extends Component {
 								}
 						 	</View>
 							<View style={{flexDirection: "row"}} >
-						 		{ Object.keys(Globals.devCards)
-									.filter((e) => this.props.user.props.devCount[e] > 0 && this.props.user.props.devCount[e] > 0)
+						 		{ Object.keys(Globals.devCardsExpanded )
+									.map((devCardId) => Object.assign({}, Globals.devCardsExpanded[devCardId], {
+										countUsed: this.props.user.props.devUsedCount[devCardId],
+										count: this.props.user.props.devCount[devCardId],
+										key: devCardId
+									}))
+									.filter((e) => e.countUsed > 0 || e.count > 0)
 									.map((e) => 
-									<Card key={ e } count={ this.props.user.props.devCount[e]} 
-										countUsed={ this.props.user.props.devUsedCount[e]} 
-										symbol={ Globals.devCardSymbols[e] }
-										color={ "black"}/>)
+									<Card { ...e } 
+										onPress={ () => this.props.onPressDevCard(e) }>{e.symbol}</Card>)
 								}
 						 	</View>
 						</View>
@@ -102,30 +91,7 @@ var styles = StyleSheet.create({
      textAlign: 'center',
      color: '#656565'
    },
-	bottomRightCircle: {
-		alignItems: "center",
-		justifyContent: "center",
-		position: "absolute",
-		width: nodeDiameter,
-		height: nodeDiameter,
-		borderRadius: nodeDiameter / 2.0,
-		backgroundColor: '#cc0000',
-		right:  0,
-		bottom: 0,
-		
-	},
-	upperLeftCircle: {
-		alignItems: "center",
-		justifyContent: "center",
-		position: "absolute",
-		width: nodeDiameter,
-		height: nodeDiameter,
-		borderRadius: nodeDiameter / 2.0,
-		backgroundColor: '#333',
-		left:  0,
-		left: 0,
-		
-	},
+
 });
 
 UserAssetsShow.contextTypes = {

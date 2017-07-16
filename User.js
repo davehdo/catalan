@@ -28,6 +28,24 @@ class User extends Component {
 	  
 	}
 
+	static find({ id, store }) {
+		let players = store.getState().game.players
+		return new User({store: store, ...(players.filter((p) => p.id == userId)[0] )})
+	}
+	
+	static signedIn({ store }) {
+		let targetId = 0 // = signedInId  this is temporary
+		return new User({store: store, ...store.getState().game.players.filter((e) => e.id == targetId)[0]})
+	}  
+
+	static withTurn({ store }) {
+		let state = store.getState()
+		let player = state.game.players[state.game.turn]
+		
+		return new User({store: store, ...player})
+	}
+
+
 	nSettlements() {	
 		let state = this.props.store.getState()
 		return Object.values(state.map.nodeContents).filter((v) => v.userId == this.props.id && v.buildingType == 1).length
