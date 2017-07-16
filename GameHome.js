@@ -246,7 +246,12 @@ class GameHome extends Component {
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
-					this.props.navigator.shift()
+					// is it your turn
+					if (User.withTurn({store: this.context.store}).id != user.id)
+						return "It's not your turn"
+					return "SUCCESS"
+						
+					// this.props.navigator.shift()
 				}}
 			});
 		
@@ -255,7 +260,9 @@ class GameHome extends Component {
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
-					this.props.navigator.shift()
+					if (User.withTurn({store: this.context.store}).id != user.id)
+						return "It's not your turn"
+					return "SUCCESS"
 				}}
 			});
 		
@@ -265,7 +272,9 @@ class GameHome extends Component {
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
-					this.props.navigator.shift()
+					if (User.withTurn({store: this.context.store}).id != user.id)
+						return "It's not your turn"
+					return "SUCCESS"
 				}}
 			});
 		

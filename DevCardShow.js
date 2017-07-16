@@ -27,7 +27,7 @@ class DevCardShow extends Component {
 	  
     return (
 		<View style={styles.container}>
-
+			<Text style={styles.message}>{ this.state.message ? `\n${this.state.message}` : ""}</Text>
 
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
 			 	<Card { ...this.props.card } width={ 280 }>
@@ -38,7 +38,7 @@ class DevCardShow extends Component {
 
  			<View style={{ flexDirection: "row", justifyContent: "center", backgroundColor: "black", padding: 10}}>
  				 <Button
- 				   onPress={() => this.props.onPressPlay()}
+ 				   onPress={() => this.setState({message: this.props.onPressPlay()})}
  				   title="Play this card"
  				   color="white"
  				   accessibilityLabel="Learn more about this purple button"
