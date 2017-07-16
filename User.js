@@ -16,19 +16,37 @@ class User extends Component {
 	constructor(props) {
 	  super(props);
 	  
-	  let resourceCount = {}
-	  Object.values(Globals.resources).map((v) => resourceCount[v] = Math.ceil( Math.random() * 10 ))
+	  // let resourceCount = {}
+	  // Object.values(Globals.resources).map((v) => resourceCount[v] = Math.ceil( Math.random() * 10 ))
 	  
-	  this.state = {
-		  name: this.props.name,
-		  color: this.props.color,
-		  resourceCount: resourceCount,
-	  };
-	  
+	  // this.state = {
+	  // 		  name: this.props.name,
+	  // 		  color: this.props.color,
+	  // 		  resourceCount: resourceCount,
+	  // };
+	  //
 	  
 	}
 
-	victoryPoints() {}
+	nSettlements() {	
+		let state = this.props.store.getState()
+		return Object.values(state.map.nodeContents).filter((v) => v.userId == this.props.id && v.buildingType == 1).length
+	} 
+	
+	nCities() {
+		let state = this.props.store.getState()
+		return Object.values(state.map.nodeContents).filter((v) => v.userId == this.props.id && v.buildingType == 2).length
+	}
+	
+	nRoads() {
+		let state = this.props.store.getState()
+		return Object.values(state.map.edgeContents).filter((v) => v.userId == this.props.id && v.road).length
+	}
+
+	victoryPoints() {
+		let state = this.props.store.getState()
+		return this.nSettlements() + 2 * this.nCities() + this.props.devCount[ Globals.DEV_VP ]
+	}
 	
   render() {
     return (
@@ -51,5 +69,9 @@ var styles = StyleSheet.create({
     alignItems: 'center'
   }
 });
+
+User.contextTypes = {
+	store: React.PropTypes.object,
+}
 
 module.exports = User;

@@ -220,33 +220,19 @@ class GameHome extends Component {
 	
 	userById( userId ) {
 		let players = this.context.store.getState().game.players
-		return players.filter((p) => p.id == userId)[0] 
+		return new User({store: this.context.store, ...(players.filter((p) => p.id == userId)[0] )})
 	}
 	
 	signedInUser() {
 		let targetId = 0 // = signedInId  this is temporary
-		
-		let state = this.context.store.getState()
-		
-		return Object.assign({
-			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 1).length,
-			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 2).length,
-			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length,
-			victoryPoints: () => 1
-		}, this.context.store.getState().game.players.filter((e) => e.id == targetId)[0])
+		return new User({store: this.context.store, ...this.context.store.getState().game.players.filter((e) => e.id == targetId)[0]})
 	}  
 
 	userWithTurn() {
 		let state = this.context.store.getState()
 		let player = state.game.players[state.game.turn]
-		let targetId = player.id
 		
-		return Object.assign({
-			nSettlements: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 1).length,
-			nCities: () => Object.values(state.map.nodeContents).filter((v) => v.userId == targetId && v.buildingType == 2).length,
-			nRoads: () => Object.values(state.map.edgeContents).filter((v) => v.userId == targetId && v.road).length,
-			victoryPoints: () => 1
-		}, player)
+		return new User({store: this.context.store, ...player})
 	}
 	
 
@@ -293,8 +279,8 @@ class GameHome extends Component {
 			
 			<WorldMap 
 	 			highlightNumber={ state.game.thisTurnRolled }
-	 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().id, nodeId: id } )}
-				onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().id, edgeId: id } )} 
+	 			onPressNode={ (id) => this.buildNode( {userId: this.userWithTurn().props.id, nodeId: id } )}
+				onPressEdge={ (id) => this.buildRoad( {userId: this.userWithTurn().props.id, edgeId: id } )} 
 				onPressHexagon={ (id) => this.moveRobber(id)} 
 				userById={ (id) => this.userById(id) }
 				map={ state.map } />
@@ -317,7 +303,7 @@ class GameHome extends Component {
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 	 				 <Button
-	 				   onPress={ () => this.buyDevCard( this.userWithTurn().id ) }
+	 				   onPress={ () => this.buyDevCard( this.userWithTurn().props.id ) }
 	 				   title="Buy Dev Card"
 	 				   color="#841584"
 	 				   accessibilityLabel="Learn more about this purple button"

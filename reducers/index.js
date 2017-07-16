@@ -150,7 +150,7 @@ const player = ( state, action) => {
 const players = ( state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let houses = ["House Stark", "House Lannister", "House Tyrell"]
-		let colors = ["black", "teal", "red"]
+		let colors = ["black", "teal", "red", "white"]
 		let lastId = 0
 		
 		return houses.map((h) => {

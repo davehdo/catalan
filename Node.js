@@ -37,7 +37,7 @@ class Node extends Component{
 	}
 	
 	shape() {
-		let color = this.props.owner ? this.props.owner.color : "white"
+		let color = this.props.owner ? this.props.owner.props.color : "white"
 		
 		switch( this.props.buildingType ) {
 			case 1:

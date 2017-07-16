@@ -49,7 +49,7 @@ class Edge extends Component{
 				borderColor: "brown", 
 				borderWidth: 4, 
 			
-				backgroundColor: this.props.owner ? this.props.owner.color : "white",
+				backgroundColor: this.props.owner ? this.props.owner.props.color : "white",
 				width: 22,
 				height: Globals.hexagonSpacing * 0.51,
 				position: "absolute",
