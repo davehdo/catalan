@@ -94,15 +94,26 @@ class GameHome extends Component {
 		if ( node.surroundedByUser() != undefined && node.surroundedByUser() != userId)
 			return this.setState({message: "Cannot build in the middle of someone else's road"})
 			
-			
+			let price
 		if (node && node.buildingType == 1)	{
 			// upgrade settlement to city
+			price = {ORE: -2, WHEAT: -3}
+			if (!this.userWithTurn().canAfford( price ))
+				return this.setState({message: "Not enough resources to build city"})
+			if (this.userWithTurn().nCities() >= Globals.maxCities)
+				return this.setState({message: "Max cities reached"})	
 			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
-			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ORE: -2, WHEAT: -3})
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...price})
 		} else {
 			// build a settlement
+			price = {LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1}
+			if (!this.userWithTurn().canAfford( price ))
+				return this.setState({message: "Not enough resources to build settlement"})
+			if (this.userWithTurn().nSettlements() >= Globals.maxSettlements)
+				return this.setState({message: "Max settlements reached"})	
+			
 			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
-			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1})
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...price})
 		}
 		return this.setState({message: warning})
 		
