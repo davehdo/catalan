@@ -323,6 +323,20 @@ expect(
 ).toEqual( 2 )
 
 expect(
+	Reducer.game(  Object.assign( Reducer.game(undefined, {})), {type: "USE_DEV_CARD", userId: 111, card: "DEV_KNIGHT"}).requireRobberMove 
+).toEqual( true )
+
+expect(
+	Reducer.game(  Object.assign( Reducer.game(undefined, {})), {type: "USE_DEV_CARD", userId: 111, card: "DEV_ROAD"}).thisTurnDevCardPlayed 
+).toEqual( true )
+
+expect(
+	Reducer.game(  Object.assign( Reducer.game(undefined, {})), {type: "USE_DEV_CARD", userId: 111, card: "DEV_KNIGHT"}).thisTurnDevCardPlayed 
+).toEqual( true )
+
+
+
+expect(
 	Reducer.game(  Object.assign( Reducer.game(undefined, {}), {roadBuildingCredits: 2}), 
 	{type: "REDEEM_ROAD_CREDIT"}).roadBuildingCredits 
 ).toEqual( 1 )

@@ -293,7 +293,8 @@ const game = ( state, action ) => {
 			turn: 0,
 			thisTurnRolled: undefined,
 			requireRobberMove: false,
-			roadBuildingCredits: 0
+			roadBuildingCredits: 0,
+			thisTurnDevCardPlayed: false
 		}
 	switch( action.type ) {
 		case "END_TURN":
@@ -336,7 +337,12 @@ const game = ( state, action ) => {
 			return Object.assign(
 				{}, 
 				state, 
-				{ roadBuildingCredits: state.roadBuildingCredits + (action.card == "DEV_ROAD" ? 2 : 0), players: players( state.players, action ) }
+				{ 
+					roadBuildingCredits: state.roadBuildingCredits + (action.card == "DEV_ROAD" ? 2 : 0), 
+					players: players( state.players, action ) ,
+					thisTurnDevCardPlayed: true,
+					requireRobberMove: action.card == "DEV_KNIGHT" ? true : action.card
+				}
 			);
 		default:
 			return Object.assign(
