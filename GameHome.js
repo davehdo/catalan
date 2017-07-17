@@ -53,6 +53,9 @@ class GameHome extends Component {
 		let edges = this.edgeAll()
 		let warning
 		
+		if (this.anyBarriersToBuyingOrEndingTurn())
+			return false
+		
 		let edge = edges.filter((e) => e.index == edgeId)[0]
 		if (edge && edge.road )
 			return this.setState({message: "There is already a road there"})
@@ -81,6 +84,9 @@ class GameHome extends Component {
 		let warning
 		let nodes = this.nodeAll()
 		let node = nodes.filter((e) => e.index == nodeId)[0]
+		
+		if (this.anyBarriersToBuyingOrEndingTurn())
+			return false
 		
 		// look for reasons not to allow building
 		if (node && node.buildingType >= 1 && node.userId != userId)
@@ -212,8 +218,8 @@ class GameHome extends Component {
 	
 	endTurn() {
 		let state = this.context.store.getState()
-		if (state.game.requireRobberMove)
-			return this.setState({message: "Robber move required"})			
+		if (this.anyBarriersToBuyingOrEndingTurn())
+			return false		
 		if (state.game.thisTurnRolled == undefined) 
 			return this.setState({message: "Must roll first"})
 			
@@ -222,19 +228,36 @@ class GameHome extends Component {
 			
 	}
 	
-	
-
-	buyDevCard( userId ) {
+	anyBarriersToBuyingOrEndingTurn() { // catch things user must do before ending turn OR buying anything
 		let state = this.context.store.getState()
+		if (state.game.requireRobberMove) {
+			this.setState({message: "Robber move required"})		
+			return true
+		}
+		if (state.game.thisTurnRolled == undefined) {
+			this.setState({message: "Must roll dice first" })
+			return true
+		}
+		// if (!User.signedIn({store: this.context.store}).ownsTurn()) {// this should get moved to anyBarriersToBuyingOrEndingTurn
+		// 	this.setState({message: "It's not your turn"})
+		// 	return true
+		// }
+		return false
+	}
+	
+	buyDevCard( user ) {
+		// let state = this.context.store.getState()
 		let cost = { ORE: -1, WHEAT: -1, SHEEP: -1 }
-		if (state.game.requireRobberMove)
-			return this.setState({message: "Robber move required"})			
-		if (!User.withTurn({store: this.context.store}).canAfford( cost ))
-			return this.setState({message: "Not enough resources to buy this"})
-			
-		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId, rand: Math.random() })
-		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...cost})
+		let warning 
 		
+		if (this.anyBarriersToBuyingOrEndingTurn())
+			return false
+		if (!user.canAfford( cost ))
+			return this.setState({message: "Not enough resources to buy this"})
+				
+		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId: user.props.id, rand: Math.random() })
+		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...cost})
+		this.setState({message: warning})
 	}
 	
 	onPressDevCard( card, user ) {
@@ -303,7 +326,7 @@ class GameHome extends Component {
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
-						( User.signedIn({store: this.context.store}).props.id == User.withTurn({store: this.context.store}).props.id ) ?
+						( User.withTurn({store: this.context.store}).isSignedIn() ) ?
 					<Text style={styles.description}>
 						 { turnOfUser.name }, its your turn{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled}. Tap map to build` : "Roll dice"}
@@ -351,7 +374,7 @@ class GameHome extends Component {
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 	 				 <Button
-	 				   onPress={ () => this.buyDevCard( User.withTurn({store: this.context.store}).props.id ) }
+	 				   onPress={ () => this.buyDevCard( User.signedIn({store: this.context.store}) ) }
 	 				   title="Buy Dev Card"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
