@@ -327,6 +327,10 @@ expect(
 ).toEqual( true )
 
 expect(
+	Reducer.game(  Object.assign( Reducer.game(undefined, {})), {type: "USE_DEV_CARD", userId: 111, card: "DEV_ROAD"}).requireRobberMove 
+).toEqual( false )
+
+expect(
 	Reducer.game(  Object.assign( Reducer.game(undefined, {})), {type: "USE_DEV_CARD", userId: 111, card: "DEV_ROAD"}).thisTurnDevCardPlayed 
 ).toEqual( true )
 

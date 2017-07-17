@@ -39,88 +39,92 @@ class GameHome extends Component {
 		this.unsubscribe()
 	}
 	
-
-	goToNode(n) {
-		this.props.navigator.push({
-			title: 'Node',
-			component: NodeShow,
-			passProps: {node: n }
-		});
-	}
+	//
+	// goToNode(n) {
+	// 	this.props.navigator.push({
+	// 		title: 'Node',
+	// 		component: NodeShow,
+	// 		passProps: {node: n }
+	// 	});
+	// }
 	
 	
-	buildRoad( {userId, edgeId} ) {
+	buildRoad({user, edgeId}) {
 		let edges = this.edgeAll()
 		let warning
+		let state = this.context.store.getState()
 		
-		if (this.anyBarriersToBuyingOrEndingTurn())
+		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation: ({message}) => this.setState({message}) }))
 			return false
 		
 		let edge = edges.filter((e) => e.index == edgeId)[0]
 		if (edge && edge.road )
 			return this.setState({message: "There is already a road there"})
 			
-		if (edge.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0 &&
-				edge.adjacentNodes().filter((e) => e.buildingType && e.userId == userId).length == 0)
+		if (edge.adjacentEdges().filter((e) => e.road && e.userId == user.props.id).length == 0 &&
+				edge.adjacentNodes().filter((e) => e.buildingType && e.userId == user.props.id).length == 0)
 			return this.setState({message: "Warning: no adjacent road/building"})
 		if (User.withTurn({store: this.context.store}).nRoads() >= Globals.maxRoads)
 			return this.setState({message: "No road pieces remain"})
 			
 		// cannot build through someones building
+		const price = {LUMBER: -1, BRICK: -1}
 			
-		this.context.store.dispatch({ type: "BUILD_EDGE", userId, edgeId }) 
-		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, LUMBER: -1, BRICK: -1})
-		this.setState({message: warning})
+			
+		if (state.game.roadBuildingCredits > 0) { // if theres a road credit
+			this.context.store.dispatch({type: "REDEEM_ROAD_CREDIT"})
+			this.setState({message: `There are ${state.game.roadBuildingCredits} road credits left`})
+		} else if (user.canAfford( price )) {			
+			this.context.store.dispatch({ type: "BUILD_EDGE", userId: user.props.id, edgeId }) 
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
+			this.setState({message: warning})
+		} else {
+			this.setState({message: "Not enough resources"})
+		}
 	}
 
-	nodeLacksNeighbors( nodeId ) {
-		let nodeCoords = Globals.nodes.filter((e) => e.index == nodeId)[0]
-		let nodeContents = this.context.store.getState().map.nodeContents
-		
-		return nodeCoords.adjNodes.filter((id) => nodeContents[id] && nodeContents[id].buildingType).length == 0
-	}
-	
-	buildNode( {userId, nodeId} ) {
+
+	buildNode({user, nodeId}) {
 		let warning
 		let nodes = this.nodeAll()
 		let node = nodes.filter((e) => e.index == nodeId)[0]
 		
-		if (this.anyBarriersToBuyingOrEndingTurn())
+		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation: ({message}) => this.setState({message})}))
 			return false
 		
 		// look for reasons not to allow building
-		if (node && node.buildingType >= 1 && node.userId != userId)
+		if (node && node.buildingType >= 1 && node.userId != user.props.id)
 			return this.setState({message: "Someone else has already built here"})
 		if (node && node.buildingType == 2)
 			return this.setState({message: "There is already a city here"})
 		if (node.adjacentNodes().filter((n) => n.buildingType).length > 0)
 			return this.setState({message: "Too close to other buildings"})
-		if (node.adjacentEdges().filter((e) => e.road && e.userId == userId).length == 0)
+		if (node.adjacentEdges().filter((e) => e.road && e.userId == user.props.id).length == 0)
 			warning = "Warning: theres no adjacent road" 
 		// see if any one owner (thats no the building user) owns 2 or more nodes
-		if ( node.surroundedByUser() != undefined && node.surroundedByUser() != userId)
+		if ( node.surroundedByUser() != undefined && node.surroundedByUser() != user.props.id)
 			return this.setState({message: "Cannot build in the middle of someone else's road"})
 			
 			let price
 		if (node && node.buildingType == 1)	{
 			// upgrade settlement to city
 			price = {ORE: -2, WHEAT: -3}
-			if (!User.withTurn({store: this.context.store}).canAfford( price ))
+			if (!user.canAfford( price ))
 				return this.setState({message: "Not enough resources to build city"})
-			if (User.withTurn({store: this.context.store}).nCities() >= Globals.maxCities)
+			if (user.nCities() >= Globals.maxCities)
 				return this.setState({message: "Max cities reached"})	
-			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
-			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...price})
+			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId })
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 		} else {
 			// build a settlement
 			price = {LUMBER: -1, BRICK: -1, SHEEP: -1, WHEAT: -1}
-			if (!User.withTurn({store: this.context.store}).canAfford( price ))
+			if (!user.canAfford( price ))
 				return this.setState({message: "Not enough resources to build settlement"})
-			if (User.withTurn({store: this.context.store}).nSettlements() >= Globals.maxSettlements)
+			if (user.nSettlements() >= Globals.maxSettlements)
 				return this.setState({message: "Max settlements reached"})	
 			
-			this.context.store.dispatch({ type: "BUILD_NODE", userId, nodeId })
-			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId, ...price})
+			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId })
+			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 		}
 		return this.setState({message: warning})
 		
@@ -170,7 +174,7 @@ class GameHome extends Component {
 	}
 
 
-	rollDice() {
+	rollDice({ user }) {
 		let state = this.context.store.getState()
 		if (state.game.requireRobberMove)
 			return this.setState({message: "Robber move required"})			
@@ -216,41 +220,46 @@ class GameHome extends Component {
 	}
 	
 	
-	endTurn() {
+	endTurn({ user }) {
+		const onViolation = ({message}) => {
+			this.props.navigator.pop()
+			this.setState({message})
+		}
+		
 		let state = this.context.store.getState()
-		if (this.anyBarriersToBuyingOrEndingTurn())
+		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
 			return false		
-		if (state.game.thisTurnRolled == undefined) 
-			return this.setState({message: "Must roll first"})
-			
+		if (state.game.roadBuildingCredits > 0)
+			return this.setState({message: `There are ${state.game.roadBuildingCredits} road credits left`})
 		this.context.store.dispatch({ type: "END_TURN" })
 		this.setState({message: undefined})
 			
 	}
 	
-	anyBarriersToBuyingOrEndingTurn() { // catch things user must do before ending turn OR buying anything
+	anyBarriersToBuyingOrEndingTurn({user, onViolation, except = []}) { // catch things user must do before ending turn OR buying anything
 		let state = this.context.store.getState()
+		if (!user.ownsTurn()) {// this should get moved to anyBarriersToBuyingOrEndingTurn
+			onViolation({message: "It's not your turn"})
+			return true
+		}
 		if (state.game.requireRobberMove) {
-			this.setState({message: "Robber move required"})		
+			onViolation({message: "Robber move required"})		
 			return true
 		}
-		if (state.game.thisTurnRolled == undefined) {
-			this.setState({message: "Must roll dice first" })
+		if (state.game.thisTurnRolled == undefined && !except.includes("dice")) {
+			onViolation({message: "Must roll dice first" })
 			return true
 		}
-		// if (!User.signedIn({store: this.context.store}).ownsTurn()) {// this should get moved to anyBarriersToBuyingOrEndingTurn
-		// 	this.setState({message: "It's not your turn"})
-		// 	return true
-		// }
 		return false
 	}
 	
-	buyDevCard( user ) {
+	buyDevCard({ user }) {
 		// let state = this.context.store.getState()
 		let cost = { ORE: -1, WHEAT: -1, SHEEP: -1 }
 		let warning 
+		const onViolation = ({message}) => this.setState({message})
 		
-		if (this.anyBarriersToBuyingOrEndingTurn())
+		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
 			return false
 		if (!user.canAfford( cost ))
 			return this.setState({message: "Not enough resources to buy this"})
@@ -260,8 +269,12 @@ class GameHome extends Component {
 		this.setState({message: warning})
 	}
 	
-	onPressDevCard( card, user ) {
+	onPressDevCard({ card, user }) {
 		// this.setState({message: `Pressed ${ card }`})
+		const onViolation = ({message}) => {
+			this.props.navigator.pop()
+			this.setState({message})
+		}
 		
 		switch( card.id ) {
 		case "DEV_KNIGHT":
@@ -269,39 +282,36 @@ class GameHome extends Component {
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
-					// is it your turn
-					if (this.anyBarriersToBuyingOrEndingTurn())
+					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation, except: ["roll"]})) // allow knight to be played before the roll
 						return false
-					
+					if (this.context.store.getState().game.thisTurnDevCardPlayed) {
+						return onViolation({message: "Can play one Dev Card per turn"})
+					}
+						
 					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id})
 					this.props.navigator.pop()
-					this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"})
-					this.setState({message: "Move the robber by tapping a hexagon"})
-					
-						
+					// this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"}) // this is automatic
+					this.setState({message: "Played a knight. Move the robber by tapping a hexagon."})
 				}}
 			});
-		
 		case "DEV_VP":
 			this.props.navigator.push({
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
-					if (User.withTurn({store: this.context.store}).id != user.id)
-						return "It's not your turn"
-					return "SUCCESS"
+					this.props.navigator.pop() // no obstacles to hitting play, although doesn't do anything because this is a passive card
 				}}
 			});
-		
-			
 		case "DEV_ROAD":
 			this.props.navigator.push({
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
-					if (User.withTurn({store: this.context.store}).id != user.id)
-						return "It's not your turn"
-					return "SUCCESS"
+					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
+						return false
+					this.props.navigator.pop()
+					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id}) // this adds 2 road building credits
+					this.setState({message: "Played road building card. Build two roads"})
 				}}
 			});
 		
@@ -320,25 +330,26 @@ class GameHome extends Component {
 	
   render() {
 	  let state = this.context.store.getState()
-	  let turnOfUser = state.game.players[ state.game.turn ]
+	  // for now we treat the interface as if its whichever user owns the turn, but eventually will change this to signedIn
+	  let user = User.withTurn({store: this.context.store}) 
 	  
     return (
 		<View style={styles.container}>
       	
 			<View style={{ flexDirection: "row", justifyContent: "flex-start", padding: 10, backgroundColor: "tan" }}>
-			 	<View style={{ backgroundColor: turnOfUser.color, height: 50, width: 50 }} />
+			 	<View style={{ backgroundColor: user.props.color, height: 50, width: 50 }} />
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
-						( User.withTurn({store: this.context.store}).isSignedIn() ) ?
+						( user.isSignedIn() ) ?
 					<Text style={styles.description}>
-						 { turnOfUser.name }, its your turn{ "\n" }
+						 { user.props.name }, its your turn{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled}. Tap map to build` : "Roll dice"}
 						 
 					</Text>
 						 :
 					<Text style={styles.description}>						 
-						 Waiting on { turnOfUser.name }{ "\n" }
+						 Waiting on { user.props.name }{ "\n" }
 						 { state.game.thisTurnRolled ? `Rolled ${ state.game.thisTurnRolled }` : "Has not rolled"}
 					</Text>
 		 
@@ -352,33 +363,34 @@ class GameHome extends Component {
 			</View>
 			
 			<ScrollView contentContainerStyle={{ top: -60 }}>
-					<WorldMap 
-			 			highlightNumber={ state.game.thisTurnRolled }
-			 			onPressNode={ (id) => this.buildNode( {userId: User.withTurn({store: this.context.store}).props.id, nodeId: id } )}
-						onPressEdge={ (id) => this.buildRoad( {userId: User.withTurn({store: this.context.store}).props.id, edgeId: id } )} 
-						onPressHexagon={ (id) => this.moveRobber(id)} 
-						userById={ (id) => this.userById(id) }
-						map={ state.map } />
-			
-						<UserAssetsShow user={ User.signedIn({store: this.context.store}) } onPressDevCard={ (c) => this.onPressDevCard(c, User.signedIn({store: this.context.store}))  }/>
+				<WorldMap 
+		 			highlightNumber={ state.game.thisTurnRolled }
+		 			onPressNode={ (id) => this.buildNode({user, nodeId: id} )}
+					onPressEdge={ (id) => this.buildRoad({user, edgeId: id} )} 
+					onPressHexagon={ (id) => this.moveRobber(id)} 
+					userById={ (id) => User.find({id, store: this.context.store}) }
+					map={ state.map } />
+		
+				<UserAssetsShow user={ user } 
+					onPressDevCard={ (c) => this.onPressDevCard({card: c, user }) }/>
 			</ScrollView>
 					
  			<View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "black", padding: 10}}>
 	 				 <Button
-	 				   onPress={() => this.endTurn()}
+	 				   onPress={() => this.endTurn({user })}
 	 				   title="End my turn"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 					
 	 				 <Button
-	 				   onPress={ () => this.rollDice() }
+	 				   onPress={ () => this.rollDice({user }) }
 	 				   title="Roll"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
 	 				 <Button
-	 				   onPress={ () => this.buyDevCard( User.signedIn({store: this.context.store}) ) }
+	 				   onPress={ () => this.buyDevCard({user }) }
 	 				   title="Buy Dev Card"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"

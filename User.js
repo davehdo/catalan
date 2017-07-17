@@ -30,7 +30,7 @@ class User extends Component {
 
 	static find({ id, store }) {
 		let players = store.getState().game.players
-		return new User({store: store, ...(players.filter((p) => p.id == userId)[0] )})
+		return new User({store: store, ...(players.filter((p) => p.id == id)[0] )})
 	}
 	
 	static signedIn({ store }) {

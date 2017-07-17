@@ -341,7 +341,7 @@ const game = ( state, action ) => {
 					roadBuildingCredits: state.roadBuildingCredits + (action.card == "DEV_ROAD" ? 2 : 0), 
 					players: players( state.players, action ) ,
 					thisTurnDevCardPlayed: true,
-					requireRobberMove: action.card == "DEV_KNIGHT" ? true : action.card
+					requireRobberMove: (action.card == "DEV_KNIGHT") ? true : state.requireRobberMove
 				}
 			);
 		default:
