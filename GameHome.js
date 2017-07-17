@@ -270,11 +270,15 @@ class GameHome extends Component {
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
 					// is it your turn
-					if (User.withTurn({store: this.context.store}).id != user.id)
-						return "It's not your turn"
-					return "SUCCESS"
+					if (this.anyBarriersToBuyingOrEndingTurn())
+						return false
+					
+					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id})
+					this.props.navigator.pop()
+					this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"})
+					this.setState({message: "Move the robber by tapping a hexagon"})
+					
 						
-					// this.props.navigator.shift()
 				}}
 			});
 		
