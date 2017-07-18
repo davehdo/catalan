@@ -300,7 +300,8 @@ const game = ( state, action ) => {
 			thisTurnRolled: undefined,
 			requireRobberMove: false,
 			roadBuildingCredits: 0,
-			thisTurnDevCardPlayed: false
+			thisTurnDevCardPlayed: false,
+			playerWithLongestRoad: undefined
 		}
 	switch( action.type ) {
 		case "END_TURN":
@@ -314,12 +315,6 @@ const game = ( state, action ) => {
 				{}, 
 				state, 
 				{ thisTurnRolled: action.rollValue }
-			);
-		case "ADJUST_RESOURCES":
-			return Object.assign(
-				{}, 
-				state, 
-				{ players: players( state.players, action) }
 			);
 		case "REQUIRE_ROBBER_MOVE":
 			return Object.assign(
@@ -350,6 +345,17 @@ const game = ( state, action ) => {
 					requireRobberMove: (action.card == "DEV_KNIGHT") ? true : state.requireRobberMove
 				}
 			);
+		// case "BUILD_EDGE":
+		// 	let players = players( state.players, action )
+		// 	// let nRoads =
+		// 	return Object.assign(
+		// 		{},
+		// 		state,
+		// 		{
+		// 			players,
+		// 			// playerWithLongestRoad: players.map((p) => p.edgeContents)
+		// 		}
+		// 	);
 		default:
 			return Object.assign(
 				{}, 

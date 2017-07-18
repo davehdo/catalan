@@ -62,6 +62,28 @@ class HexNode extends Component{
 		// const Hexagon = require("./Hexagon.js")
 		return Edge.where({store: this.props.store, idArray: this.props.adjEdges})		
 	} 
+
+	// return arrays of all the trails from this point that do not repeat edges
+	trail({userId, edgeHist = []}) {
+		if ((edgeHist).length >= 20)
+			return false // "ERR: too long"
+			
+		let nextEdges = this.adjacentEdges().filter((e) => e.props.userId == userId && !(edgeHist).includes(e.props.index))
+		
+		if (nextEdges.length > 0) {
+			let nextAccessibleNodes = nextEdges.map((e) => {
+				return {edge: e, node: e.adjacentNodes().filter((n) => n.props.index != this.props.index)[0]}
+			})
+			let max = 0
+			nextAccessibleNodes.map(({edge, node}) => {				
+				let thisTrail = node.trail({userId, edgeHist: [...(edgeHist), edge.props.index]})
+				if (thisTrail > max) {max = thisTrail}
+			})
+			return max
+		} else {			
+			return (edgeHist).length
+		}
+	}
 	
 	displayName() {
 		switch( this.props.buildingType ) {

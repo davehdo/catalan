@@ -372,8 +372,41 @@ expect(
 	{type: "REDEEM_ROAD_CREDIT"}).roadBuildingCredits 
 ).toEqual( 1 )
 
+let playerForGameTest3 = Reducer.player(undefined, {})
+let actionForGameTest3 = {type: "BUILD_EDGE", userId: playerForGameTest3.id, edgeId: 100}
+let initGameStateForGameTest3 = Object.assign( Reducer.game(undefined, {}), {players: [playerForGameTest3 ]})
+
+expect(
+	Reducer.game( 
+		initGameStateForGameTest3, 
+		actionForGameTest3		
+	).playerWithLongestRoad 
+).toEqual( undefined  )
 
 
+expect(
+	Reducer.game(  
+		Reducer.game(  
+			initGameStateForGameTest3, 
+			actionForGameTest3		
+		), 
+		actionForGameTest3		
+	).playerWithLongestRoad 
+).toEqual( undefined  )
+
+
+expect(
+	Reducer.game(  
+		Reducer.game(  
+			Reducer.game( 
+				initGameStateForGameTest3, 
+				actionForGameTest3		
+			), 
+			actionForGameTest3		
+		), 
+		actionForGameTest3		
+	).playerWithLongestRoad 
+).toEqual( playerForGameTest3.id  )
 
 // console.log( Reducer.player( undefined, {}))
 console.log( "Tests passed ")

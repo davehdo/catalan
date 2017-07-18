@@ -34,17 +34,6 @@ class Edge extends Component{
 	}
 	
 	// const Hexagon = require("./Hexagon.js")
-	
-	adjacentNodes() {
-		const HexNode = require("./HexNode.js")
-		return HexNode.where({store: this.props.store, idArray: this.props.adjNodes})
-	} 
-	
-	adjacentEdges() {
-		return Edge.where({store: this.props.store, idArray: this.props.adjEdges})		
-	} 
-	
-	
 	static all({store}) {		
 		return Globals.edges.map((h) => {
 			// h has index, x, y, adjNodes, adjEdges, ...
@@ -59,6 +48,16 @@ class Edge extends Component{
 	static find({store, id}) {
 		return this.all({store}).filter((e) => id == e.props.index )[0]
 	}
+	
+	adjacentNodes() {
+		const HexNode = require("./HexNode.js")
+		return HexNode.where({store: this.props.store, idArray: this.props.adjNodes})
+	} 
+	
+	adjacentEdges() {
+		return Edge.where({store: this.props.store, idArray: this.props.adjEdges})		
+	} 
+	
 	
 	
 	render() {

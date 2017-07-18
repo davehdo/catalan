@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 const Globals = require("./Globals.js")
-
+const Edge = require("./Edge.js")
 
 class User extends Component {
 	constructor(props) {
@@ -79,6 +79,29 @@ class User extends Component {
 	canAfford( price ) {
 		// console.log( Object.values( price ).map((p) => (price[p] || 0) + (this.props.resourceCount[p] || 0)  )  )
 		return Object.keys( price ).filter((p) => price[p] + this.props.resourceCount[p] < 0).length == 0
+	}
+	
+	longestRoad() {
+		let startingEdges = Edge.all({store: this.props.store}).filter((e) => e.props.userId == this.props.id)
+		
+		let startingNodes = []
+		let startingNodeIds = []
+		startingEdges.map((e) => {
+			e.adjacentNodes().map((n) => {
+				if (!startingNodeIds.includes(n.props.index)) {
+					startingNodes.push( n )
+					startingNodeIds.push( n.props.index )
+				}
+			})
+		})
+		
+		let max = 0
+		let trails = startingNodes.map((s) => {
+			let len = s.trail({userId: this.props.id})
+			if (len > max) { max = len }
+		})
+
+		return max
 	}
 	
   render() {

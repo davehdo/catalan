@@ -39,6 +39,7 @@ class UserAssetsShow extends Component {
 						 	<Text style={styles.smallStats}>C { this.props.user.nCities() }/{Globals.maxCities}</Text>
 						 	<Text style={styles.smallStats}>R { this.props.user.nRoads() }/{Globals.maxRoads}</Text>
 						 	<Text style={styles.smallStats}>VP { this.props.user.victoryPoints() }</Text>
+							<Text style={styles.smallStats}>LR { this.props.user.longestRoad() }</Text>
 		 					<Award>Longest road</Award>
 		 					<Award>Largest army</Award>
 						</View>
