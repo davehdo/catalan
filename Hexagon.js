@@ -167,6 +167,20 @@ class Hexagon extends Component {
 	
 	
 	render() {
+		let dots = {
+			2: ".",
+			3: "..",
+			4: "...",
+			5: "....",
+			6: ".....",
+			7: "",
+			8: ".....",
+			9: "....",
+			10: "...",
+			11: "..",
+			12: ".",
+		}[ this.props.number ] || ""
+		
 	    return (
 		<TouchableOpacity key={`hex_${ this.props.index }`} onPress={ this.props.onPress }>
 	      <View  style={this.styles.hexagon}>
@@ -176,6 +190,10 @@ class Hexagon extends Component {
 			 <View style={{ position: "absolute"}}>
 				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
 			 </View>
+			<View style={{ position: "absolute", top: 50}}>
+			 	<Text style={{ fontSize: 60, backgroundColor: "transparent" }}>{ dots }</Text>
+			 </View>
+				
 			 	{ this.props.robber ? <RobberChip /> : <View />}
 	      </View>
 		</TouchableOpacity>
