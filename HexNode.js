@@ -43,8 +43,8 @@ class HexNode extends Component{
 		let counts = []
 		let dupFound = undefined 
 		let ownerIds = this.adjacentEdges()
-			.filter((e) => e.road)
-			.map((e) => e.userId)
+			.filter((e) => e.props.road)
+			.map((e) => e.props.userId)
 
 		ownerIds.map((id) => {
 			if (counts.indexOf(id) == -1) {counts.push(id)} else {dupFound = id}

@@ -56,35 +56,32 @@ class GameHome extends Component {
 	
 	
 	buildRoad({user, edge}) {
-		let warning
 		let state = this.context.store.getState()
 		
 		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation: ({message}) => this.setState({message}) }))
 			return false
-		
-		// let edge = edges.filter((e) => e.index == edgeId)[0]
-		if (edge.road )
-			return this.setState({message: "There is already a road there"})
-			
+		if (edge.props.road)
+			return this.setState({message: "There is already a road there"}) // works 7/17/2017
 		if (edge.adjacentEdges().filter((e) => e.props.road && e.props.userId == user.props.id).length == 0 &&
 				edge.adjacentNodes().filter((e) => e.props.buildingType && e.props.userId == user.props.id).length == 0)
-			return this.setState({message: "Warning: no adjacent road/building"})
+			return this.setState({message: "Warning: no adjacent road/building"}) // works 7/17/2017
 		if (User.withTurn({store: this.context.store}).nRoads() >= Globals.maxRoads)
 			return this.setState({message: "No road pieces remain"})
-			
-		// cannot build through someones building
+		if (false) {
+			// cannot build through someones building
+		}	
 		const price = {LUMBER: -1, BRICK: -1}
 			
 			
 		if (state.game.roadBuildingCredits > 0) { // if theres a road credit
 			this.context.store.dispatch({type: "REDEEM_ROAD_CREDIT"})
 			this.setState({message: `There are ${state.game.roadBuildingCredits} road credits left`})
-		} else if (user.canAfford( price )) {			
+		} else if (user.canAfford( price )) { // works 7/17/2017
 			this.context.store.dispatch({ type: "BUILD_EDGE", userId: user.props.id, edgeId: edge.props.index }) 
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
-			this.setState({message: warning})
+			this.setState({message: "Built road!"}) 
 		} else {
-			this.setState({message: "Not enough resources"})
+			this.setState({message: "Not enough resources"}) // works 7/17/2017
 		}
 	}
 
@@ -100,16 +97,16 @@ class GameHome extends Component {
 		
 		// look for reasons not to allow building
 		if (node.props.buildingType >= 1 && node.props.userId != user.props.id)
-			return this.setState({message: "Someone else has already built here"})
+			return this.setState({message: "Someone else has already built here"}) // works 7/17/2017
 		if (node.props.buildingType == 2)
-			return this.setState({message: "There is already a city here"})
+			return this.setState({message: "There is already a city here"}) // works 7/17/2017
 		if (node.adjacentNodes().filter((n) => n.props.buildingType).length > 0)
-			return this.setState({message: "Too close to other buildings"})
+			return this.setState({message: "Too close to other buildings"}) // works 7/17/2017
 		if (node.adjacentEdges().filter((e) => e.props.road && e.props.userId == user.props.id).length == 0)
-			warning = "Warning: theres no adjacent road" 
+			warning = "Warning: theres no adjacent road" // works 7/17/2017
 		// see if any one owner (thats no the building user) owns 2 or more nodes
 		if ( node.surroundedByUser() != undefined && node.surroundedByUser() != user.props.id)
-			return this.setState({message: "Cannot build in the middle of someone else's road"})
+			return this.setState({message: "Cannot build in the middle of someone else's road"}) // works 7/17/2017
 			
 		let price
 		if (node.props.buildingType == 1)	{
@@ -119,7 +116,7 @@ class GameHome extends Component {
 				return this.setState({message: "Not enough resources to build city"})
 			if (user.nCities() >= Globals.maxCities)
 				return this.setState({message: "Max cities reached"})	
-			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId: node.props.index })
+			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId: node.props.index }) // works 7/17/2017
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 		} else {
 			// build a settlement
@@ -129,7 +126,7 @@ class GameHome extends Component {
 			if (user.nSettlements() >= Globals.maxSettlements)
 				return this.setState({message: "Max settlements reached"})	
 			
-			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId: node.props.index })
+			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId: node.props.index }) // works 7/17/2017
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 		}
 		return this.setState({message: warning})
@@ -206,11 +203,11 @@ class GameHome extends Component {
 			return true
 		}
 		if (state.game.requireRobberMove) {
-			onViolation({message: "Robber move required"})		
+			onViolation({message: "Robber move required"})
 			return true
 		}
 		if (state.game.thisTurnRolled == undefined && !except.includes("dice")) {
-			onViolation({message: "Must roll dice first" })
+			onViolation({message: "Must roll dice first" }) // works 7/17/2017
 			return true
 		}
 		return false
