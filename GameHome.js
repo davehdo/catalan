@@ -267,16 +267,41 @@ class GameHome extends Component {
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
+					let store = this.context.store
+					let state = this.context.store.getState()
+					
 					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation, except: ["roll"]})) // allow knight to be played before the roll
 						return false
-					if (this.context.store.getState().game.thisTurnDevCardPlayed) {
+					if (state.game.thisTurnDevCardPlayed) {
 						return onViolation({message: "Can play one Dev Card per turn"})
 					}
-						
+					
 					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id})
 					this.props.navigator.pop()
 					// this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"}) // this is automatic
-					this.setState({message: "Played a knight. Move the robber by tapping a hexagon."})
+					this.setState({message: "Played a knight. Move robber by tapping a hexagon."})
+					
+					// =========================  award largest army  ========================
+					
+					
+					let playerToBeat = state.game.playerWithLargestArmy ? User.find({store, id: state.game.playerWithLargestArmy}) : undefined
+					let roadToBeat = state.game.playerWithLargestArmy ? playerToBeat.armySize() : 2
+		
+
+					User.all({store}).map((u) => {
+						let s = u.armySize()
+						if (s > roadToBeat) {
+							playerToBeat = u
+							roadToBeat = s
+						}
+					})
+		
+					if (playerToBeat && (playerToBeat.props.id != state.game.playerWithLargestArmy)) {
+
+						this.setState({message: `There is a new owner of the Largest Army!`})
+						this.context.store.dispatch({type: "AWARD_LARGEST_ARMY", userId: playerToBeat.props.id})
+					}
+					
 				}}
 			});
 		case "DEV_VP":

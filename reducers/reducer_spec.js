@@ -384,6 +384,16 @@ expect(
 ).toEqual( playerForGameTest3.id  )
 
 
+let playerForGameTest4 = Reducer.player(undefined, {})
+let actionForGameTest4 = {type: "AWARD_LARGEST_ARMY", userId: playerForGameTest4.id}
+let initGameStateForGameTest4 = Object.assign( Reducer.game(undefined, {}), {players: [playerForGameTest4 ]})
+
+expect(
+	Reducer.game( 
+		initGameStateForGameTest4, 
+		actionForGameTest4		
+	).playerWithLargestArmy
+).toEqual( playerForGameTest4.id  )
 // expect(
 // 	Reducer.game(
 // 		Reducer.game(

@@ -109,6 +109,10 @@ class User extends Component {
 		return max
 	}
 	
+	armySize() {
+		return this.props.devUsedCount.DEV_KNIGHT || 0
+	}
+	
   render() {
     return (
 		<View style={styles.container}></View>

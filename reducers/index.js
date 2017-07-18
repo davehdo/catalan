@@ -301,14 +301,16 @@ const game = ( state, action ) => {
 			requireRobberMove: false,
 			roadBuildingCredits: 0,
 			thisTurnDevCardPlayed: false,
-			playerWithLongestRoad: undefined
+			playerWithLongestRoad: undefined,
+			playerWithLargestArmy: undefined
 		}
 	switch( action.type ) {
 		case "END_TURN":
 			return Object.assign(
 				{}, 
 				state, 
-				(state.turn >= state.players.length - 1) ? {turn: 0, round: state.round + 1, thisTurnRolled: undefined} : { turn: state.turn + 1, thisTurnRolled: undefined}
+				(state.turn >= state.players.length - 1) ? {turn: 0, round: state.round + 1} : { turn: state.turn + 1},
+				{thisTurnRolled: undefined, thisTurnDevCardPlayed: false}
 			);
 		case "ROLL":
 			return Object.assign(
@@ -350,6 +352,12 @@ const game = ( state, action ) => {
 				{},
 				state,
 				{ playerWithLongestRoad: action.userId }
+			);
+		case "AWARD_LARGEST_ARMY":
+				return Object.assign(
+				{},
+				state,
+				{ playerWithLargestArmy: action.userId }
 			);
 		default:
 			return Object.assign(
