@@ -73,12 +73,6 @@ class UserAssetsShow extends Component {
 
 const nodeDiameter = 20
 var styles = StyleSheet.create({
-	cardOuter: {
-		margin: 6, 
-		backgroundColor: "whitesmoke", padding: 6, 
-		borderRadius: 3, 
-		height: 45, width: 33
-	},
 	award: {
 		margin: 4, 
 		backgroundColor: "whitesmoke", 

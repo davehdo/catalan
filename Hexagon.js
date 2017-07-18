@@ -174,8 +174,9 @@ class Hexagon extends Component {
 				<View style={this.styles.hexagonBefore} />
 				<View style={this.styles.hexagonAfter} />
 			 <View style={{ position: "absolute"}}>
-				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }{ this.props.robber ? "*" : ""}</Text>
+				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
 			 </View>
+			 	{ this.props.robber ? <RobberChip /> : <View />}
 	      </View>
 		</TouchableOpacity>
 	    )
@@ -183,11 +184,30 @@ class Hexagon extends Component {
 	  
 }
 
+const RobberChip = () => {
+	return(
+		<View style={ styles.robberChip }><Text style={{color: "white", fontSize: 40}}>R</Text></View>
+	)
+}
 
+const nodeDiameter = 70
 
 let styles = StyleSheet.create({
    hexNumberLabel: { backgroundColor: "transparent", fontSize: 40},
-   hexNumberLabelHighlighted: { backgroundColor: "transparent", fontSize: 50, fontWeight: "bold", color: "red"}
+   hexNumberLabelHighlighted: { backgroundColor: "transparent", fontSize: 50, fontWeight: "bold", color: "red"},
+	robberChip: {
+		alignItems: "center",
+		justifyContent: "center",
+		position: "absolute",
+		width: nodeDiameter,
+		height: nodeDiameter,
+		borderRadius: nodeDiameter / 2.0,
+		backgroundColor: '#cc0000',
+		top:  0,
+		left: 10,
+	
+	},
+	
 });
 
 

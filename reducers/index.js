@@ -165,7 +165,7 @@ const players = ( state, action) => {
 				name: h,
 				color: colors.shift()
 			}))
-		})		
+		})
 	}
 	
 	switch( action.type ) {
