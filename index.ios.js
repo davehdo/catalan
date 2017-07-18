@@ -39,10 +39,10 @@ const store = configureStore({})
 const GameHome = require('./GameHome');
 const WorldMap = require('./WorldMap');
 const User = require('./User.js');
-
-store.subscribe(() =>
-	console.log(store.getState())
-)
+//
+// store.subscribe(() =>
+// 	console.log(store.getState())
+// )
 
 export default class Catalan extends Component {
 	constructor() {
