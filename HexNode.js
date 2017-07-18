@@ -15,13 +15,53 @@ const settlementWidth = 55
 const cityWidth = 80
 
 
-class Node extends Component{
+
+class HexNode extends Component{
 	constructor(props) {
 		super(props); // x, y, buildingType, userId
 
 		this.coordinates = {x: this.props.x, y: this.props.y} || {x: 0, y: 0}
 		
 	}
+	
+	static all({store}) {		
+		return Globals.nodes.map((h) => {
+			// h has index, x, y, adjNodes, adjEdges, ...
+			return new HexNode({store, ...h, ...store.getState().map.nodeContents[h.index]})
+		})		
+	}
+	
+	static where({store, idArray=[]}) {
+		return this.all({store}).filter((e) => idArray.includes(e.props.index) )
+	}
+
+	static find({store, id=[]}) {
+		return this.all({store}).filter((e) => id == e.props.index )[0]
+	}
+	
+	surroundedByUser() {
+		let counts = []
+		let dupFound = undefined 
+		let ownerIds = this.adjacentEdges()
+			.filter((e) => e.road)
+			.map((e) => e.userId)
+
+		ownerIds.map((id) => {
+			if (counts.indexOf(id) == -1) {counts.push(id)} else {dupFound = id}
+		})
+		return dupFound
+	}
+	
+	
+	adjacentNodes() {
+		return HexNode.where({store: this.props.store, idArray: this.props.adjNodes})
+	} 
+	
+	adjacentEdges() {
+		const Edge = require("./Edge.js")
+		// const Hexagon = require("./Hexagon.js")
+		return Edge.where({store: this.props.store, idArray: this.props.adjEdges})		
+	} 
 	
 	displayName() {
 		switch( this.props.buildingType ) {
@@ -142,4 +182,4 @@ const styles = StyleSheet.create({
 	
 });
 
-module.exports = Node;
+module.exports = HexNode;

@@ -10,7 +10,7 @@ import {
 	// TouchableOpacity
 } from 'react-native';
 
-const Node = require("./Node.js")
+const HexNode = require("./HexNode.js")
 const Edge = require("./Edge.js")
 const Hexagon = require("./Hexagon.js")
 const Globals = require("./Globals.js")
@@ -62,7 +62,7 @@ class WorldMap extends Component {
 							onPress={ () => this.props.onPressEdge( h.index )} />)}
 
 					{ Globals.nodes.map((h) => 
-						<Node key={ h.index } { ...h } { ...nodeContents[h.index] } 
+						<HexNode key={ h.index } { ...h } { ...nodeContents[h.index] } 
 							owner={nodeContents[h.index] ? this.props.userById( nodeContents[h.index].userId ) : undefined}
 							onPress={ () => this.props.onPressNode( h.index )} /> )}			
 

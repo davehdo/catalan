@@ -11,16 +11,23 @@ import {
 } from 'react-native';
 
 // const NodeShow = require('./NodeShow.js');
-// const Node = require("./Node.js")
-// const Edge = require("./Edge.js")
+
 const Globals = require("./Globals.js")
-
-
 
 class Hexagon extends Component {
 	constructor(props) {
 		super(props); // props includes highlight, number, resource, and index
 
+		const expectedProbs = ["x", "y", "index", "adjNodes", "adjEdges"]
+		expectedProbs.map((p) => {
+			
+			if (props[p] == undefined) {
+				console.log( `Warning: absent property ${ p }`)
+			}
+		}
+		)
+		// console.log(HexNode)
+		
 		this.coordinates = {x: this.props.x, y: this.props.y} || {x: 0, y: 0}
 		
 		let sideToSideWidth = Globals.hexagonSpacing 
@@ -70,6 +77,36 @@ class Hexagon extends Component {
 			}
 		}
 	}
+	
+	
+	
+	static all({store}) {		
+		return Globals.hexagons.map((h) => {
+			// h has index, x, y, adjNodes, adjEdges, ...
+			return new Hexagon({store, ...h, ...store.getState().map.hexagonContents[h.index]})
+		})		
+	}
+	
+	static where({store, idArray=[]}) {
+		return this.all({store}).filter((e) => idArray.includes(e.props.index) )
+	}
+	
+	static find({store, id}) {
+		return this.all({store}).filter((e) => id == e.props.index )[0]
+	}
+	
+	
+	adjacentNodes() {
+		const HexNode = require("./HexNode.js")
+		return HexNode.where({store: this.props.store, idArray: this.props.adjNodes})
+	} 
+	
+	adjacentEdges() {
+		const Edge = require("./Edge.js")
+		return Edge.where({store: this.props.store, idArray: this.props.adjEdges})		
+	} 
+	
+	
 	
 	displayName() {
 		let r = undefined
@@ -127,17 +164,7 @@ class Hexagon extends Component {
 		return r
 	}
 	
-	get adjacentNodes() {
-		return this.props.nodesWithinRadius( this, 1 / Math.sqrt( 3 ) )
-	}
 	
-	// get adjacentHexagons() {
-	// 	return this.props.hexagonsWithinRadius( this, 1 / Math.sqrt( 3 ) )
-	// }
-	
-	// get adjacentEdges() {
-	// 	return this.props.edgesWithinRadius( this, 0.5 / Math.sqrt( 3 ) )
-	// }
 	
 	render() {
 	    return (

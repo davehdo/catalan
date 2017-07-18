@@ -12,12 +12,18 @@ import {
 } from 'react-native';
 
 const WorldMap = require('./WorldMap');
-const NodeShow = require('./NodeShow');
+// const NodeShow = require('./NodeShow');
 // const Node = require('./Node');
 const User = require('./User.js');
 const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
 const DevCardShow = require("./DevCardShow.js")
+
+
+const HexNode = require("./HexNode.js")
+const Edge = require("./Edge.js")
+const Hexagon = require("./Hexagon.js")
+
 
 class GameHome extends Component {
 	constructor(props) {
@@ -49,20 +55,19 @@ class GameHome extends Component {
 	// }
 	
 	
-	buildRoad({user, edgeId}) {
-		let edges = this.edgeAll()
+	buildRoad({user, edge}) {
 		let warning
 		let state = this.context.store.getState()
 		
 		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation: ({message}) => this.setState({message}) }))
 			return false
 		
-		let edge = edges.filter((e) => e.index == edgeId)[0]
-		if (edge && edge.road )
+		// let edge = edges.filter((e) => e.index == edgeId)[0]
+		if (edge.road )
 			return this.setState({message: "There is already a road there"})
 			
-		if (edge.adjacentEdges().filter((e) => e.road && e.userId == user.props.id).length == 0 &&
-				edge.adjacentNodes().filter((e) => e.buildingType && e.userId == user.props.id).length == 0)
+		if (edge.adjacentEdges().filter((e) => e.props.road && e.props.userId == user.props.id).length == 0 &&
+				edge.adjacentNodes().filter((e) => e.props.buildingType && e.props.userId == user.props.id).length == 0)
 			return this.setState({message: "Warning: no adjacent road/building"})
 		if (User.withTurn({store: this.context.store}).nRoads() >= Globals.maxRoads)
 			return this.setState({message: "No road pieces remain"})
@@ -75,7 +80,7 @@ class GameHome extends Component {
 			this.context.store.dispatch({type: "REDEEM_ROAD_CREDIT"})
 			this.setState({message: `There are ${state.game.roadBuildingCredits} road credits left`})
 		} else if (user.canAfford( price )) {			
-			this.context.store.dispatch({ type: "BUILD_EDGE", userId: user.props.id, edgeId }) 
+			this.context.store.dispatch({ type: "BUILD_EDGE", userId: user.props.id, edgeId: edge.props.index }) 
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 			this.setState({message: warning})
 		} else {
@@ -84,36 +89,37 @@ class GameHome extends Component {
 	}
 
 
-	buildNode({user, nodeId}) {
+	buildNode({user, node}) {
+		const store = this.context.store 
+		
 		let warning
-		let nodes = this.nodeAll()
-		let node = nodes.filter((e) => e.index == nodeId)[0]
+		// let nodes = Node.all({store})
 		
 		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation: ({message}) => this.setState({message})}))
 			return false
 		
 		// look for reasons not to allow building
-		if (node && node.buildingType >= 1 && node.userId != user.props.id)
+		if (node.props.buildingType >= 1 && node.props.userId != user.props.id)
 			return this.setState({message: "Someone else has already built here"})
-		if (node && node.buildingType == 2)
+		if (node.props.buildingType == 2)
 			return this.setState({message: "There is already a city here"})
-		if (node.adjacentNodes().filter((n) => n.buildingType).length > 0)
+		if (node.adjacentNodes().filter((n) => n.props.buildingType).length > 0)
 			return this.setState({message: "Too close to other buildings"})
-		if (node.adjacentEdges().filter((e) => e.road && e.userId == user.props.id).length == 0)
+		if (node.adjacentEdges().filter((e) => e.props.road && e.props.userId == user.props.id).length == 0)
 			warning = "Warning: theres no adjacent road" 
 		// see if any one owner (thats no the building user) owns 2 or more nodes
 		if ( node.surroundedByUser() != undefined && node.surroundedByUser() != user.props.id)
 			return this.setState({message: "Cannot build in the middle of someone else's road"})
 			
-			let price
-		if (node && node.buildingType == 1)	{
+		let price
+		if (node.props.buildingType == 1)	{
 			// upgrade settlement to city
 			price = {ORE: -2, WHEAT: -3}
 			if (!user.canAfford( price ))
 				return this.setState({message: "Not enough resources to build city"})
 			if (user.nCities() >= Globals.maxCities)
 				return this.setState({message: "Max cities reached"})	
-			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId })
+			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId: node.props.index })
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 		} else {
 			// build a settlement
@@ -123,55 +129,13 @@ class GameHome extends Component {
 			if (user.nSettlements() >= Globals.maxSettlements)
 				return this.setState({message: "Max settlements reached"})	
 			
-			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId })
+			this.context.store.dispatch({ type: "BUILD_NODE", userId: user.props.id, nodeId: node.props.index })
 			this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...price})
 		}
 		return this.setState({message: warning})
 		
 	}
 	
-	
-	hexagonAll() {
-		let hexagonContents = this.context.store.getState().map.hexagonContents
-		return Globals.hexagons.map((h) => Object.assign({ 
-			adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
-			adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
-		}, h, hexagonContents[h.index]))
-	}
-
-	edgeAll() {
-		let edgeContents = this.context.store.getState().map.edgeContents
-		return Globals.edges.map((h) => Object.assign({ 
-			adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
-			adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
-			// adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 )
-		}, h, edgeContents[h.index]))
-	}
-
-	nodeAll() {
-		let nodeContents = this.context.store.getState().map.nodeContents
-		
-		return Globals.nodes.map((h) => {
-			const associationMethods = {
-					adjacentNodes: () => this.nodeAll().filter((n) => h.adjNodes.indexOf(n.index) != -1 ),
-					adjacentEdges: () => this.edgeAll().filter((n) => h.adjEdges.indexOf(n.index) != -1 )
-			}
-			return Object.assign(associationMethods, {
-				surroundedByUser: () => {
-					let counts = []
-					let dupFound = undefined 
-					let ownerIds = associationMethods.adjacentEdges()
-						.filter((e) => e.road)
-						.map((e) => e.userId)
-
-					ownerIds.map((id) => {
-						if (counts.indexOf(id) == -1) {counts.push(id)} else {dupFound = id}
-					})
-					return dupFound
-				}
-			}, h, nodeContents[h.index])
-		})
-	}
 
 
 	rollDice({ user }) {
@@ -181,10 +145,10 @@ class GameHome extends Component {
 		if (state.game.thisTurnRolled) 
 			return this.setState({message: "Already rolled this turn"})
 		
+		// =================================  roll  =================================
 		let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
 		// this.props.worldMap.highlightNumber = newRoll
 		this.context.store.dispatch({ type: "ROLL", rollValue: newRoll })
-		
 		
 		if (newRoll == 7) {
 			this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"})
@@ -192,19 +156,18 @@ class GameHome extends Component {
 		} else {			
 			this.setState({message: undefined})	
 		}
-		// reward the players 
-		let winningHexagons = this.hexagonAll().filter((h) => h.number == newRoll && !h.robber)
+		
+		// ==========================  reward the players  ==========================
+		let winningHexagons = Hexagon.all({store: this.context.store }).filter((h) => h.number == newRoll && !h.robber)
 		
 		winningHexagons.map((hex) => {
 			hex.adjacentNodes().map((node) => {
-				if (node.buildingType) {
-					let action = {type: "ADJUST_RESOURCES", userId: node.userId}
-					action[ hex.resource ] = node.buildingType
+				if (node.props.buildingType) {
+					let action = {type: "ADJUST_RESOURCES", userId: node.props.userId}
+					action[ hex.resource ] = node.props.buildingType
 					this.context.store.dispatch(action)
 				}
-				
 			})
-			
 		})
 				
 	}
@@ -256,7 +219,6 @@ class GameHome extends Component {
 	buyDevCard({ user }) {
 		// let state = this.context.store.getState()
 		let cost = { ORE: -1, WHEAT: -1, SHEEP: -1 }
-		let warning 
 		const onViolation = ({message}) => this.setState({message})
 		
 		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
@@ -266,7 +228,7 @@ class GameHome extends Component {
 				
 		this.context.store.dispatch({ type: "DRAW_DEV_CARD", userId: user.props.id, rand: Math.random() })
 		this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...cost})
-		this.setState({message: warning})
+		this.setState({message: "Bought Development Card"})
 	}
 	
 	onPressDevCard({ card, user }) {
@@ -329,6 +291,7 @@ class GameHome extends Component {
 	}
 	
   render() {
+	  const store = this.context.store
 	  let state = this.context.store.getState()
 	  // for now we treat the interface as if its whichever user owns the turn, but eventually will change this to signedIn
 	  let user = User.withTurn({store: this.context.store}) 
@@ -365,8 +328,8 @@ class GameHome extends Component {
 			<ScrollView contentContainerStyle={{ top: -60 }}>
 				<WorldMap 
 		 			highlightNumber={ state.game.thisTurnRolled }
-		 			onPressNode={ (id) => this.buildNode({user, nodeId: id} )}
-					onPressEdge={ (id) => this.buildRoad({user, edgeId: id} )} 
+		 			onPressNode={ (id) => this.buildNode({user, node: HexNode.find({id, store})} )}
+					onPressEdge={ (id) => this.buildRoad({user, edge: Edge.find({id, store})} )} 
 					onPressHexagon={ (id) => this.moveRobber(id)} 
 					userById={ (id) => User.find({id, store: this.context.store}) }
 					map={ state.map } />

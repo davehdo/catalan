@@ -12,8 +12,6 @@ import {
 
 const Globals = require("./Globals.js")
 
-// const NodeShow = require('./NodeShow.js');
-
 
 const edgeThickness = 16
 
@@ -34,6 +32,34 @@ class Edge extends Component{
 		
 		
 	}
+	
+	// const Hexagon = require("./Hexagon.js")
+	
+	adjacentNodes() {
+		const HexNode = require("./HexNode.js")
+		return HexNode.where({store: this.props.store, idArray: this.props.adjNodes})
+	} 
+	
+	adjacentEdges() {
+		return Edge.where({store: this.props.store, idArray: this.props.adjEdges})		
+	} 
+	
+	
+	static all({store}) {		
+		return Globals.edges.map((h) => {
+			// h has index, x, y, adjNodes, adjEdges, ...
+			return new Edge({store, ...h, ...store.getState().map.edgeContents[h.index]})
+		})		
+	}
+	
+	static where({store, idArray=[]}) {
+		return this.all({store}).filter((e) => idArray.includes(e.props.index) )
+	}
+
+	static find({store, id}) {
+		return this.all({store}).filter((e) => id == e.props.index )[0]
+	}
+	
 	
 	render() {
 		this.styles = {
