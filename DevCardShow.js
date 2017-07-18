@@ -35,7 +35,9 @@ class DevCardShow extends Component {
 					<Text style={styles.description}>{ this.props.card.description }</Text>
 		 		</Card>
 			</View>
-
+			
+			{ this.props.children ? this.props.children : 
+			
  			<View style={{ flexDirection: "row", justifyContent: "center", backgroundColor: "black", padding: 10}}>
  				 <Button
  				   onPress={() => this.setState({message: this.props.onPressPlay()})}
@@ -44,6 +46,7 @@ class DevCardShow extends Component {
  				   accessibilityLabel="Learn more about this purple button"
  				 />
  			</View>
+			}
 						 
       </View>
     );

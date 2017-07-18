@@ -19,6 +19,7 @@ const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
 const DevCardShow = require("./DevCardShow.js")
 const TradeShow = require("./TradeShow.js")
+const Card = require("./Card.js")
 
 
 const HexNode = require("./HexNode.js")
@@ -377,7 +378,55 @@ class GameHome extends Component {
 		
 			
 		case "DEV_MONOPOLY":
-			return false
+			let monopolize = ({user, resource }) => {
+				this.props.navigator.pop()
+
+				let state = this.context.store.getState()
+				
+				if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
+					return false
+				if (state.game.thisTurnDevCardPlayed) {
+					return onViolation({message: "Can play one Dev Card per turn"})
+				}
+				if (!user.props.devCount[ card.id ]) {
+					return onViolation({message: "No more of this card to play"}) // works 7/18/2017
+				}
+				
+				// charge all other users
+				let qtyCollected = 0
+				User.all({store: this.context.store}).map((u) => {
+					if (u.props.id != user.props.id) {
+						qtyCollected += u.props.resourceCount[ resource ]
+						
+						let adj = {}
+						adj[ resource ] = -u.props.resourceCount[ resource ]
+						
+						this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: u.props.id, ...adj})
+					}
+				})
+				
+				// credit this user
+				let adj2 = {}
+				adj2[ resource ] = qtyCollected
+				this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...adj2})
+				return this.setState({message: `Monopolized all the ${ resource }!`})
+			}
+			
+			let children = 
+				<View style={{ padding: 20 }}>
+					<Text>Choose a resource to monopolize:</Text>
+					<View style={{flexDirection: "row", justifyContent: "center", marginBottom: 10}}>						 
+				 		{ Globals.resourceCardColorMapArray.map((e) => 
+								<Card key={ e[1] } count={ user.props.resourceCount[e[0]]} color={e[1]} onPress={() => monopolize({user, resource: e[0]})}/>
+						)}
+				 	</View>
+				</View>
+				
+			this.props.navigator.push({
+				title: 'Development Card',
+				component: DevCardShow,
+				passProps: {card: card, children}
+			});
 			
 		case "DEV_PLENTY":
 			return false
