@@ -78,7 +78,12 @@ class User extends Component {
 
 	victoryPoints() {
 		let state = this.props.store.getState()
-		return this.nSettlements() + 2 * this.nCities() + this.props.devCount[ Globals.DEV_VP ]
+		
+		return this.nSettlements() + 
+			2 * this.nCities() + 
+			this.props.devCount[ Globals.DEV_VP ] +
+			(this.props.id == state.game.playerWithLongestRoad ? 2 : 0) +
+			(this.props.id == state.game.playerWithLargestArmy ? 2 : 0)
 	}
 	
 	canAfford( price ) {

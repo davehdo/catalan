@@ -224,8 +224,8 @@ class GameHome extends Component {
 	
 	anyBarriersToBuyingOrEndingTurn({user, onViolation, except = []}) { // catch things user must do before ending turn OR buying anything
 		let state = this.context.store.getState()
-		if (!user.ownsTurn()) {// this should get moved to anyBarriersToBuyingOrEndingTurn
-			onViolation({message: "It's not your turn"})
+		if (!user.ownsTurn()) { 
+			onViolation({message: "It's not your turn"}) // works 7/17/2017
 			return true
 		}
 		if (state.game.requireRobberMove) {
@@ -275,6 +275,9 @@ class GameHome extends Component {
 					if (state.game.thisTurnDevCardPlayed) {
 						return onViolation({message: "Can play one Dev Card per turn"})
 					}
+					if (!user.props.devCount[ card.id ]) {
+						return onViolation({message: "No more of this card to play"}) // works 7/18/2017
+					}
 					
 					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id})
 					this.props.navigator.pop()
@@ -317,8 +320,17 @@ class GameHome extends Component {
 				title: 'Development Card',
 				component: DevCardShow,
 				passProps: {card: card, onPressPlay: () => {
+					let state = this.context.store.getState()
+					
 					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
 						return false
+					if (state.game.thisTurnDevCardPlayed) {
+						return onViolation({message: "Can play one Dev Card per turn"})
+					}
+					if (!user.props.devCount[ card.id ]) {
+						return onViolation({message: "No more of this card to play"}) // works 7/18/2017
+					}
+					
 					this.props.navigator.pop()
 					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id}) // this adds 2 road building credits
 					this.setState({message: "Played road building card. Build two roads"})
@@ -383,7 +395,7 @@ class GameHome extends Component {
 					map={ state.map } />
 		
 				<UserAssetsShow user={ User.signedIn({store}) } 
-					onPressDevCard={ (c) => this.onPressDevCard({card: c, user }) }/>
+					onPressDevCard={ (c) => this.onPressDevCard({card: c, user: User.signedIn({store}) }) }/>
 			</ScrollView>
 					
  			<View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "black", padding: 10}}>
