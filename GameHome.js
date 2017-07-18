@@ -56,6 +56,7 @@ class GameHome extends Component {
 	
 	
 	buildRoad({user, edge}) {
+		let store = this.context.store
 		let state = this.context.store.getState()
 		
 		if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation: ({message}) => this.setState({message}) }))
@@ -82,6 +83,27 @@ class GameHome extends Component {
 			this.setState({message: "Built road!"}) 
 		} else {
 			this.setState({message: "Not enough resources"}) // works 7/17/2017
+		}
+		
+		// =========================  check longest road  ===========================
+		
+		
+		let playerToBeat = state.game.playerWithLongestRoad ? User.find({store, id: state.game.playerWithLongestRoad}) : undefined
+		let roadToBeat = state.game.playerWithLongestRoad ? playerToBeat.longestRoad() : 4
+		
+
+		User.all({store}).map((u) => {
+			let thisLongestRoad = u.longestRoad()
+			if (thisLongestRoad > roadToBeat) {
+				playerToBeat = u
+				roadToBeat = thisLongestRoad
+			}
+		})
+		
+		if (playerToBeat && (playerToBeat.props.id != state.game.playerWithLongestRoad)) {
+
+			this.setState({message: `There is a new owner of the Longest Road!`})
+			this.context.store.dispatch({type: "AWARD_LONGEST_ROAD", userId: playerToBeat.props.id})
 		}
 	}
 

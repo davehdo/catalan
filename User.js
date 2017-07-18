@@ -28,13 +28,18 @@ class User extends Component {
 	  
 	}
 
+	static all({store}) {
+		let players = store.getState().game.players
+		return players.map((p) => new User({store: store, ...p}))
+	}
+
 	static find({ id, store }) {
 		let players = store.getState().game.players
 		return new User({store: store, ...(players.filter((p) => p.id == id)[0] )})
 	}
 	
 	static signedIn({ store }) {
-		const targetId = 0 // = signedInId  this is temporary
+		const targetId = 10 // = signedInId  this is temporary
 		return new User({store: store, ...store.getState().game.players.filter((e) => e.id == targetId)[0]})
 	}  
 
@@ -46,7 +51,7 @@ class User extends Component {
 	}
 
 	isSignedIn() {
-		const targetId = 0
+		const targetId = 10
 		return this.props.id == targetId
 	}
 	

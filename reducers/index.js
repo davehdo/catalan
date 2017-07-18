@@ -157,7 +157,7 @@ const players = ( state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let houses = ["House Stark", "House Lannister", "House Tyrell"]
 		let colors = ["black", "teal", "red", "white"]
-		let lastId = 0
+		let lastId = 10
 		
 		return houses.map((h) => {
 			return(Object.assign(player(undefined, {}), {
@@ -345,17 +345,12 @@ const game = ( state, action ) => {
 					requireRobberMove: (action.card == "DEV_KNIGHT") ? true : state.requireRobberMove
 				}
 			);
-		// case "BUILD_EDGE":
-		// 	let players = players( state.players, action )
-		// 	// let nRoads =
-		// 	return Object.assign(
-		// 		{},
-		// 		state,
-		// 		{
-		// 			players,
-		// 			// playerWithLongestRoad: players.map((p) => p.edgeContents)
-		// 		}
-		// 	);
+		case "AWARD_LONGEST_ROAD":
+				return Object.assign(
+				{},
+				state,
+				{ playerWithLongestRoad: action.userId }
+			);
 		default:
 			return Object.assign(
 				{}, 

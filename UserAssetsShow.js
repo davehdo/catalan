@@ -40,7 +40,7 @@ class UserAssetsShow extends Component {
 						 	<Text style={styles.smallStats}>R { this.props.user.nRoads() }/{Globals.maxRoads}</Text>
 						 	<Text style={styles.smallStats}>VP { this.props.user.victoryPoints() }</Text>
 							<Text style={styles.smallStats}>LR { this.props.user.longestRoad() }</Text>
-		 					<Award>Longest road</Award>
+		 					{( this.props.user.props.id == this.context.store.getState().game.playerWithLongestRoad ) ? <Award>Longest road</Award> : <View />}
 		 					<Award>Largest army</Award>
 						</View>
 			 			<View style={{ flex: 4}}> 
