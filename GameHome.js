@@ -155,7 +155,7 @@ class GameHome extends Component {
 		}
 		
 		// ==========================  reward the players  ========================== // works 7/17/2017
-		let winningHexagons = Hexagon.all({store: this.context.store }).filter((h) => h.props.number == newRoll && !h.robber)
+		let winningHexagons = Hexagon.all({store: this.context.store }).filter((h) => h.props.number == newRoll && !h.props.robber)
 		
 		let adjByUserId = {}
 		winningHexagons.map((hex) => {

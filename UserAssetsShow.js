@@ -34,6 +34,7 @@ class UserAssetsShow extends Component {
 				 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", padding: 10 }}>
 						<View style={{ flex: 2, alignItems: "center"}}>
 
+						 	<Text style={styles.teamName}>{ this.props.user.props.name }</Text>
 						 	<Text style={styles.smallStats}>S { this.props.user.nSettlements() }/{Globals.maxSettlements}</Text>
 						 	<Text style={styles.smallStats}>C { this.props.user.nCities() }/{Globals.maxCities}</Text>
 						 	<Text style={styles.smallStats}>R { this.props.user.nRoads() }/{Globals.maxRoads}</Text>
@@ -89,6 +90,11 @@ var styles = StyleSheet.create({
      fontSize: 18,
      textAlign: 'center',
      color: '#656565'
+   },
+   teamName: {
+     fontSize: 12,
+     textAlign: 'center',
+     color: 'black'
    },
    smallStats: {
      fontSize: 12,
