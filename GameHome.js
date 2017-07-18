@@ -18,6 +18,7 @@ const User = require('./User.js');
 const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
 const DevCardShow = require("./DevCardShow.js")
+const TradeShow = require("./TradeShow.js")
 
 
 const HexNode = require("./HexNode.js")
@@ -254,6 +255,43 @@ class GameHome extends Component {
 		this.setState({message: "Bought Development Card"})
 	}
 	
+	trade({user}) {
+		const onViolation = ({message}) => {
+			this.setState({message})
+		}
+		
+		this.props.navigator.push({
+			title: 'Trade',
+			component: TradeShow,
+			passProps: {user, onFinalizeTrade: ({cost, benefit}) => {
+				this.props.navigator.pop()
+				
+				if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))  
+					return false
+				
+				if (cost == benefit) 
+					return this.setState({message: "Not a smart trade"})
+				if (cost == undefined)
+					return this.setState({message: "Did not choose what to give away. No trade was completed"})
+				if (benefit == undefined)	
+					return this.setState({message: "Did not choose what to obtain. No trade was completed"})
+						
+				let exchangeRate = 4
+				let tradeComponents = {}
+				
+				tradeComponents[cost] = -exchangeRate
+				tradeComponents[benefit] = 1
+				
+				if (!user.canAfford( tradeComponents ))
+					return this.setState({message: "You cannot afford this trade"})
+				
+				this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...tradeComponents})
+				this.setState({message: `You traded away ${ exchangeRate } ${ cost } to obtain 1 ${ benefit }`})
+				
+			}}
+		})
+	}
+	
 	onPressDevCard({ card, user }) {
 		// this.setState({message: `Pressed ${ card }`})
 		const onViolation = ({message}) => {
@@ -401,7 +439,7 @@ class GameHome extends Component {
  			<View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "black", padding: 10}}>
 	 				 <Button
 	 				   onPress={() => this.endTurn({user })}
-	 				   title="End my turn"
+	 				   title="End turn"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
@@ -409,6 +447,12 @@ class GameHome extends Component {
 	 				 <Button
 	 				   onPress={ () => this.rollDice({user }) }
 	 				   title="Roll"
+	 				   color="white"
+	 				   accessibilityLabel="Learn more about this purple button"
+	 				 />
+	 				 <Button
+	 				   onPress={ () => this.trade({user }) }
+	 				   title="Trade"
 	 				   color="white"
 	 				   accessibilityLabel="Learn more about this purple button"
 	 				 />
