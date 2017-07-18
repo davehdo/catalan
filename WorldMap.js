@@ -15,7 +15,7 @@ const Edge = require("./Edge.js")
 const Hexagon = require("./Hexagon.js")
 const Globals = require("./Globals.js")
 
-const MapHeight = 310
+const MapHeight = 320
 
 
 class WorldMap extends Component {

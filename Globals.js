@@ -43,7 +43,7 @@ module.exports = {
 	maxSettlements: 5, // Each player has a supply of 15 roads, 5 settlements, and 4 cities.
 	maxCities: 4,
 	maxRoads: 15,
-	hexagonSpacing: 200,
+	hexagonSpacing: 220,
 	resources: { WHEAT, SHEEP, LUMBER, BRICK, ORE, DESERT },	
 	resourceCards: { WHEAT, SHEEP, LUMBER, BRICK, ORE },
 	devCards: {DEV_KNIGHT, DEV_VP, DEV_ROAD, DEV_MONOPOLY, DEV_PLENTY},
