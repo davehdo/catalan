@@ -43,9 +43,13 @@ class UserAssetsShow extends Component {
 						</View>
 			 			<View style={{ flex: 4}}> 
 							<View style={{flexDirection: "row", marginBottom: 10}} >						 
-						 		{ Globals.resourceCardColorMapArray.map((e) => 
-									<Card key={ e[1] } count={ this.props.user.props.resourceCount[e[0]]} color={ e[1]}/>)
-								}
+						 		{ Globals.resourceCardColorMapArray.map((e) => {
+									const l = this.props.user.props.lastResourceAdjustment
+									let adj = l ? l[e[0]] : undefined;
+									return (
+										<Card key={ e[1] } count={ this.props.user.props.resourceCount[e[0]]} color={ e[1] }>{ adj && adj > 0 ? "+" : ""}{adj}</Card>
+									)
+								})}
 						 	</View>
 							<View style={{flexDirection: "row"}} >
 						 		{ Object.keys(Globals.devCardsExpanded )

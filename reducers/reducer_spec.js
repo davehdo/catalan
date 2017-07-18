@@ -123,6 +123,15 @@ expect(
 		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
 	}, {type: "ADJUST_RESOURCES", WHEAT: -1}).resourceCount.WHEAT
 ).toEqual( 9 )
+
+expect(
+	Reducer.player({ 
+		id: undefined,
+		name: 'Unnamed player',
+		color: 'white',
+		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
+	}, {type: "ADJUST_RESOURCES", WHEAT: -1}).lastResourceAdjustment
+).toEqual( {WHEAT: -1} )
 //
 expect(
 	Reducer.player({
@@ -212,6 +221,24 @@ expect(
 		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
 	}], {type: "ADJUST_RESOURCES", WHEAT: -1, userId: 13})[0].resourceCount.WHEAT
 ).toEqual( 10 )
+
+expect(
+	Reducer.players([{ 
+		id: 12,
+		name: 'Unnamed player',
+		color: 'white',
+		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
+	}], {type: "ADJUST_RESOURCES", WHEAT: -1, userId: 12})[0].lastResourceAdjustment
+).toEqual( {WHEAT: -1} )
+
+expect(
+	Reducer.players([{ 
+		id: 12,
+		name: 'Unnamed player',
+		color: 'white',
+		resourceCount: { WHEAT: 10, SHEEP: 10, LUMBER: 10, BRICK: 10, ORE: 10 } 
+	}], {type: "ADJUST_RESOURCES", WHEAT: -1, userId: 13})[0].lastResourceAdjustment
+).toEqual( undefined )
 
 
 let playerForPlayersTest1 = Object.assign( Reducer.player(undefined, {}), {id: 123})

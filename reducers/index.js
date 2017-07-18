@@ -131,14 +131,20 @@ const player = ( state, action) => {
 			color: "white",
 			resourceCount: resourceCount(undefined, {}),
 			devCount: devCount(undefined, {}),
-			devUsedCount: devUsedCount(undefined, {})
+			devUsedCount: devUsedCount(undefined, {}),
+			lastResourceAdjustment: undefined
 		}
 	}
 	switch( action.type ) {
 		case "DRAW_DEV_CARD":
 			return action.userId == state.id ? Object.assign({}, state, {devCount: devCount( state.devCount, action) }) : state
 		case "ADJUST_RESOURCES":
-			return Object.assign({}, state, {resourceCount: resourceCount( state.resourceCount, action) })
+			let resourcesOnly = {}
+			Object.keys( action ).map((e) => {if (!["userId", "type"].includes(e)) {resourcesOnly[e] = action[e]}})
+			return Object.assign({}, state, {
+				resourceCount: resourceCount( state.resourceCount, action),
+				lastResourceAdjustment: resourcesOnly
+			})
 		case "USE_DEV_CARD":
 			return Object.assign({}, state, {devCount: devCount( state.devCount, action), devUsedCount: devUsedCount( state.devUsedCount, action) })
 		default:

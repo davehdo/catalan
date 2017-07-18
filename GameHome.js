@@ -138,9 +138,9 @@ class GameHome extends Component {
 	rollDice({ user }) {
 		let state = this.context.store.getState()
 		if (state.game.requireRobberMove)
-			return this.setState({message: "Robber move required"})			
+			return this.setState({message: "Robber move required"})  // works 7/17/2017
 		if (state.game.thisTurnRolled) 
-			return this.setState({message: "Already rolled this turn"})
+			return this.setState({message: "Already rolled this turn"})  // works 7/17/2017
 		
 		// =================================  roll  =================================
 		let newRoll = Math.ceil(Math.random() * 6) + Math.ceil(Math.random() * 6) 
@@ -149,13 +149,13 @@ class GameHome extends Component {
 		
 		if (newRoll == 7) {
 			this.context.store.dispatch({type: "REQUIRE_ROBBER_MOVE"})
-			this.setState({message: "Move the robber by tapping a hexagon"})
+			this.setState({message: "Move the robber by tapping a hexagon"})  // works 7/17/2017
 		} else {			
 			this.setState({message: undefined})	
 		}
 		
 		// ==========================  reward the players  ==========================
-		let winningHexagons = Hexagon.all({store: this.context.store }).filter((h) => h.number == newRoll && !h.robber)
+		let winningHexagons = Hexagon.all({store: this.context.store }).filter((h) => h.props.number == newRoll && !h.robber)
 		
 		winningHexagons.map((hex) => {
 			hex.adjacentNodes().map((node) => {
@@ -331,7 +331,7 @@ class GameHome extends Component {
 					userById={ (id) => User.find({id, store: this.context.store}) }
 					map={ state.map } />
 		
-				<UserAssetsShow user={ user } 
+				<UserAssetsShow user={ User.signedIn({store}) } 
 					onPressDevCard={ (c) => this.onPressDevCard({card: c, user }) }/>
 			</ScrollView>
 					
