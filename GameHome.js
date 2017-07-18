@@ -232,8 +232,8 @@ class GameHome extends Component {
 			onViolation({message: "Robber move required"})
 			return true
 		}
-		if (state.game.thisTurnRolled == undefined && !except.includes("dice")) {
-			onViolation({message: "Must roll dice first" }) // works 7/17/2017
+		if (state.game.thisTurnRolled == undefined && !except.includes("roll_dice")) {
+			onViolation({message: "Must roll dice first" }) // works 7/17/2017; exception works 7/17/2017
 			return true
 		}
 		return false
@@ -270,7 +270,7 @@ class GameHome extends Component {
 					let store = this.context.store
 					let state = this.context.store.getState()
 					
-					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation, except: ["roll"]})) // allow knight to be played before the roll
+					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation, except: ["roll_dice"]})) // allow knight to be played before the roll
 						return false
 					if (state.game.thisTurnDevCardPlayed) {
 						return onViolation({message: "Can play one Dev Card per turn"})
