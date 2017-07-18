@@ -154,19 +154,23 @@ class GameHome extends Component {
 			this.setState({message: undefined})	
 		}
 		
-		// ==========================  reward the players  ==========================
+		// ==========================  reward the players  ========================== // works 7/17/2017
 		let winningHexagons = Hexagon.all({store: this.context.store }).filter((h) => h.props.number == newRoll && !h.robber)
 		
+		let adjByUserId = {}
 		winningHexagons.map((hex) => {
 			hex.adjacentNodes().map((node) => {
 				if (node.props.buildingType) {
-					let action = {type: "ADJUST_RESOURCES", userId: node.props.userId}
-					action[ hex.resource ] = node.props.buildingType
-					this.context.store.dispatch(action)
+					if (adjByUserId[ node.props.userId ] == undefined)
+						adjByUserId[ node.props.userId ] = {}
+					adjByUserId[ node.props.userId ][ hex.props.resource ] = (adjByUserId[ node.props.userId ][ hex.props.resource ] || 0) + node.props.buildingType
 				}
 			})
 		})
-				
+		
+		Object.keys(adjByUserId).map((userId) => {		
+			this.context.store.dispatch({type: "ADJUST_RESOURCES", userId, ...adjByUserId[userId]})
+		})
 	}
 	
 	moveRobber(hexId) {
