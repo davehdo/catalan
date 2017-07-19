@@ -18,6 +18,7 @@ const User = require('./User.js');
 const Globals = require("./Globals.js")
 const UserAssetsShow = require("./UserAssetsShow.js")
 const DevCardShow = require("./DevCardShow.js")
+const DevCardPlentyShow = require("./DevCardPlentyShow.js")
 const TradeShow = require("./TradeShow.js")
 const Card = require("./Card.js")
 
@@ -396,11 +397,9 @@ class GameHome extends Component {
 				let qtyCollected = 0
 				User.all({store: this.context.store}).map((u) => {
 					if (u.props.id != user.props.id) {
-						qtyCollected += u.props.resourceCount[ resource ]
-						
 						let adj = {}
 						adj[ resource ] = -u.props.resourceCount[ resource ]
-						
+						qtyCollected -= adj[ resource ]
 						this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: u.props.id, ...adj})
 					}
 				})
@@ -409,6 +408,7 @@ class GameHome extends Component {
 				let adj2 = {}
 				adj2[ resource ] = qtyCollected
 				this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...adj2})
+				this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id}) // this adds 2 road building credits
 				return this.setState({message: `Monopolized all the ${ resource }!`})
 			}
 			
@@ -429,7 +429,30 @@ class GameHome extends Component {
 			});
 			
 		case "DEV_PLENTY":
-			return false
+			this.props.navigator.push({
+				title: 'Development Card',
+				component: DevCardPlentyShow,
+				passProps: {card, user, onPressPlay: ({user, resources}) => {
+					this.props.navigator.pop()
+
+					let state = this.context.store.getState()
+				
+					if (this.anyBarriersToBuyingOrEndingTurn({user, onViolation}))
+						return false
+					if (state.game.thisTurnDevCardPlayed) {
+						return onViolation({message: "Can play one Dev Card per turn"})
+					}
+					if (!user.props.devCount[ card.id ]) {
+						return onViolation({message: "No more of this card to play"}) // works 7/18/2017
+					}
+				
+					// credit this user
+					this.context.store.dispatch({ type: "ADJUST_RESOURCES", userId: user.props.id, ...resources})
+					this.context.store.dispatch({type: "USE_DEV_CARD", card: card.id, userId: user.props.id}) // this adds 2 road building credits
+					return this.setState({message: `Collected 2 resources!`})
+				}}
+			});
+
 			
 		default: 
 			return false

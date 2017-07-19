@@ -50,9 +50,9 @@ module.exports = {
 	devCardsExpanded: {
 		DEV_KNIGHT: {id: DEV_KNIGHT, symbol: "Kn", color: "#000", name: "Knight", description: "When played, move the robber and draw a random card from one of the players who own property in the new location"}, 
 		DEV_VP: {id: DEV_VP, symbol: "VP", color: "#111", name: "Victory Point", description: "This card does not need to be played. A victory point is automatically added to your total."}, 
-		DEV_ROAD: {id: DEV_ROAD, symbol: "Rd", color: "#222", name: "Road building", description: "When played, build two roads immediately"}, 
+		DEV_ROAD: {id: DEV_ROAD, symbol: "Rd", color: "#222", name: "Road Building", description: "When played, place 2 new roads as if you just built them"}, 
 		DEV_MONOPOLY: {id: DEV_MONOPOLY, symbol: "Mo", color: "#333", name: "Monopoly", description: "Select a resource that all other players must hand over to you"}, 
-		DEV_PLENTY: {id: DEV_PLENTY, symbol: "Pl", color: "#444", name: "", description: ""}
+		DEV_PLENTY: {id: DEV_PLENTY, symbol: "Pl", color: "#444", name: "Year of Plenty", description: "Take two resources and add them to your hand. You can use them immediately to build."}
 	},
 	DEV_KNIGHT, 
 	DEV_VP, 

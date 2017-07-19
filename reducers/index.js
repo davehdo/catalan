@@ -52,7 +52,7 @@ const makeId = (len = 32 ) => {
 const resourceCount = (state, action) => {
 	if( typeof( state ) == "undefined" ) {
 		let resourceCount = {}
-		Object.keys(Globals.resourceCards).map((v) => resourceCount[v] = 10)
+		Object.keys(Globals.resourceCards).map((v) => resourceCount[v] = 30)
 		return resourceCount
 	}
 	
