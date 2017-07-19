@@ -495,7 +495,7 @@ class GameHome extends Component {
 			 	</View>
 			</View>
 			
-			<ScrollView contentContainerStyle={{ top: -60, height: 540 }} horizontal={ true }>
+			<ScrollView contentContainerStyle={{ top: -60, height: 540 }} maximumZoomScale={ 2 } bounces={ false } horizontal={ true }>
 				<View style={{ alignItems: "center" }}>
 					<WorldMap 
 			 			highlightNumber={ state.game.thisTurnRolled }
