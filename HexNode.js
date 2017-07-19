@@ -10,9 +10,10 @@ import {
 } from 'react-native';
 
 const Globals = require("./Globals.js")
-const nodeDiameter = 30
-const settlementWidth = 55
-const cityWidth = 80
+const nodeDiameter = 30 / 220 * Globals.hexagonSpacing
+const clickableDiameter = 70 / 220 * Globals.hexagonSpacing
+const settlementWidth = 55 / 220 * Globals.hexagonSpacing
+const cityWidth = 80 / 220 * Globals.hexagonSpacing
 
 
 
@@ -99,43 +100,49 @@ class HexNode extends Component{
 	}
 	
 	shape() {
-		let color = this.props.owner ? this.props.owner.props.color : "white"
+		let color = this.props.owner ? this.props.owner.props.color : "purple"
 		
 		switch( this.props.buildingType ) {
 			case 1:
-				return <View key={ `n_${this.props.index}` } transform={[
-					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
-					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
-				]} style={styles.settlement}>
-				<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonInner), {backgroundColor: color})} />
-			        <View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: color})} />
+				return <View style={ styles.settlement }>
+						<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonInner), {backgroundColor: color})} />
+			        	<View style={Object.assign({}, StyleSheet.flatten(styles.settlementHexagonBefore), {borderBottomColor: color})} />
 			      </View>
 				break;
 			case 2:
-				return <View key={ `n_${this.props.index}` } transform={[
-					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
-					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
-				]} style={styles.city}>
+				return <View style={ styles.city }>
 				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonInner), {backgroundColor: color})} />
 				        <View style={Object.assign({}, StyleSheet.flatten(styles.cityHexagonBefore), {borderBottomColor: color})} />
 				      </View>
 				break;
 			default:
-				return <View key={ `n_${this.props.index}` } transform={[
-					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
-					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
-				]} style={ styles.circle} />
+				return <View style={ styles.circle } />
 		}
 	}
 	
 	render() {	
 		return (
-			<TouchableOpacity key={`node_${ this.props.index }`} onPress={ this.props.onPress	 }>
+			<Touch key={`node_${ this.props.index }`} onPress={ this.props.onPress	 }>
+				<View transform={[
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
+					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)}
+				]}>
+				<View style={ styles.transparentClickableCircle } />
 				{ this.shape() }
-			</TouchableOpacity>
+				</View>
+			</Touch>
 		)
 	}
 }
+
+const Touch = (props) => { // takes key and onPress 
+	if (props.onPress) {
+		return <TouchableOpacity onPress={ props.onPress }>{ props.children }</TouchableOpacity>
+	} else {
+		return <View>{ props.children }</View>
+	}
+}
+
 
 const styles = StyleSheet.create({
 	circle: {
@@ -146,7 +153,15 @@ const styles = StyleSheet.create({
 		backgroundColor: 'brown',
 		left:  -nodeDiameter / 2,
 		top: -nodeDiameter / 2,
-		
+	},	
+	transparentClickableCircle: {
+		position: "absolute",
+		width: clickableDiameter,
+		height: clickableDiameter,
+		borderRadius: clickableDiameter / 2.0,
+		backgroundColor: 'transparent',
+		left:  -clickableDiameter / 2,
+		top: -clickableDiameter / 2,
 	},
    settlement: {
 	  position: "absolute",

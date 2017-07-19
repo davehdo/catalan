@@ -13,8 +13,8 @@ import {
 const Globals = require("./Globals.js")
 
 
-const edgeThickness = 16
-
+const edgeThickness = 16 / 220 * Globals.hexagonSpacing
+const clickableBoxThickness = 50 / 220 * Globals.hexagonSpacing
 
 class Edge extends Component{
 	constructor(props) {
@@ -22,15 +22,13 @@ class Edge extends Component{
 		
 		this.coordinates = {x: this.props.x, y: this.props.y} || {x: 0, y: 0}
 		
-		let indexOnes = Math.abs(this.props.index) % 10.0
+		const indexOnes = Math.abs(this.props.index) % 10.0
 
 		this.rotation = {
-			0: 60,
+			0: -60,
 			1: 0,
-			2: -60
+			2: 60
 		}[ indexOnes ]
-		
-		
 	}
 	
 	// const Hexagon = require("./Hexagon.js")
@@ -67,28 +65,52 @@ class Edge extends Component{
 				width: edgeThickness,
 				height: Globals.hexagonSpacing * 0.51,
 				position: "absolute",
-				left: -edgeThickness * 0.5 + this.coordinates.x * Globals.hexagonSpacing,
-				top: -Globals.hexagonSpacing * 0.25 - this.coordinates.y * Globals.hexagonSpacing,			
+				left: -edgeThickness * 0.5,
+				top: -Globals.hexagonSpacing * 0.25,			
 			},
 			paved: {
 				borderColor: "brown", 
 				borderWidth: 4, 
 			
-				backgroundColor: this.props.owner ? this.props.owner.props.color : "white",
+				backgroundColor: this.props.owner ? this.props.owner.props.color : "purple",
 				width: 22,
 				height: Globals.hexagonSpacing * 0.51,
 				position: "absolute",
-				left: -edgeThickness * 0.5 + this.coordinates.x * Globals.hexagonSpacing,
-				top: -Globals.hexagonSpacing * 0.25 - this.coordinates.y * Globals.hexagonSpacing,			
+				left: -edgeThickness * 0.5,
+				top: -Globals.hexagonSpacing * 0.25,			
+			},
+			clickableBox: {
+				backgroundColor: "transparent",
+				width: clickableBoxThickness,
+				height: Globals.hexagonSpacing * 0.3,
+				position: "absolute",
+				left: -clickableBoxThickness * 0.5,
+				top: -Globals.hexagonSpacing * 0.15,			
 			},
 		}
 
 		return (
-			 <TouchableOpacity key={`edge_${ this.props.index }`} onPress={ this.props.onPress }>
-				<View transform={[{ rotate: `${-this.rotation }deg`} ]} 
-				style={ this.props.road ? this.styles.paved : this.styles.unpaved } />
-			</TouchableOpacity>
+			//transform={[ ]}
+			
+			 <Touch key={`edge_${ this.props.index }`} onPress={ this.props.onPress }>
+				<View transform={[
+					{translateX: (Globals.hexagonSpacing * this.coordinates.x)},
+					{translateY: -(Globals.hexagonSpacing * this.coordinates.y)},
+					{ rotate: `${this.rotation }deg`},
+				]}>
+					<View style={ this.styles.clickableBox } />
+					<View style={ this.props.road ? this.styles.paved : this.styles.unpaved } />
+				</View>
+			</Touch>
 		)
+	}
+}
+
+const Touch = (props) => { // takes key and onPress 
+	if (props.onPress) {
+		return <TouchableOpacity onPress={ props.onPress }>{ props.children }</TouchableOpacity>
+	} else {
+		return <View>{ props.children }</View>
 	}
 }
 

@@ -31,7 +31,9 @@ class UserAssetsShow extends Component {
 
   render() {
     return (
-				 <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", padding: 10 }}>
+				 <View style={{ flexDirection: "row", justifyContent: "center", padding: 10 }}>
+		 
+		 				{/* column 1 */}
 						<View style={{ flex: 2, alignItems: "center"}}>
 
 						 	<Text style={styles.teamName}>{ this.props.user.props.name }</Text>
@@ -43,7 +45,9 @@ class UserAssetsShow extends Component {
 			 				{( this.props.user.props.id == this.context.store.getState().game.playerWithLongestRoad ) && <Award>Longest road</Award> }
 		 					{( this.props.user.props.id == this.context.store.getState().game.playerWithLargestArmy ) && <Award>Largest army</Award> }
 						</View>
-			 			<View style={{ flex: 4}}> 
+							
+						{/* column 2 */}
+			 			<View style={{ flex: 4 }}> 
 							<View style={{flexDirection: "row", marginBottom: 10}} >						 
 						 		{ Globals.resourceCardColorMapArray.map((e) => {
 									const l = this.props.user.props.lastResourceAdjustment
@@ -53,7 +57,8 @@ class UserAssetsShow extends Component {
 									)
 								})}
 						 	</View>
-							<View style={{flexDirection: "row"}} >
+								
+							<View style={{flexDirection: "row", marginBottom: 100}} >
 						 		{ Object.keys(Globals.devCardsExpanded )
 									.map((devCardId) => Object.assign({}, Globals.devCardsExpanded[devCardId], {
 										countUsed: this.props.user.props.devUsedCount[devCardId],

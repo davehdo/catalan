@@ -182,7 +182,7 @@ class Hexagon extends Component {
 		}[ this.props.number ] || ""
 		
 	    return (
-		<TouchableOpacity key={`hex_${ this.props.index }`} onPress={ this.props.onPress }>
+		<Touch key={`hex_${ this.props.index }`} onPress={ this.props.onPress }>
 	      <View  style={this.styles.hexagon}>
 				<View style={this.styles.hexagonInner} />
 				<View style={this.styles.hexagonBefore} />
@@ -190,13 +190,13 @@ class Hexagon extends Component {
 			 <View style={{ position: "absolute"}}>
 				<Text style={ this.props.highlight ? styles.hexNumberLabelHighlighted : styles.hexNumberLabel }>{ this.props.number }</Text>
 			 </View>
-			<View style={{ position: "absolute", top: 50}}>
-			 	<Text style={{ fontSize: 60, backgroundColor: "transparent" }}>{ dots }</Text>
+			<View style={{ position: "absolute", top: 50 / 220 * Globals.hexagonSpacing}}>
+			 	<Text style={{ fontSize: 60 / 220 * Globals.hexagonSpacing, backgroundColor: "transparent" }}>{ dots }</Text>
 			 </View>
 				
 			 	{ this.props.robber ? <RobberChip /> : <View />}
 	      </View>
-		</TouchableOpacity>
+		</Touch>
 	    )
 	  }
 	  
@@ -208,11 +208,20 @@ const RobberChip = () => {
 	)
 }
 
-const nodeDiameter = 70
+const nodeDiameter = 70 / 220 * Globals.hexagonSpacing
+
+const Touch = (props) => { // takes key and onPress 
+	if (props.onPress) {
+		return <TouchableOpacity onPress={ props.onPress }>{ props.children }</TouchableOpacity>
+	} else {
+		return <View>{ props.children }</View>
+	}
+}
+
 
 let styles = StyleSheet.create({
-   hexNumberLabel: { backgroundColor: "transparent", fontSize: 40},
-   hexNumberLabelHighlighted: { backgroundColor: "transparent", fontSize: 50, fontWeight: "bold", color: "red"},
+   hexNumberLabel: { backgroundColor: "transparent", fontSize: 40 / 220 * Globals.hexagonSpacing},
+   hexNumberLabelHighlighted: { backgroundColor: "transparent", fontSize: 50 / 220 * Globals.hexagonSpacing, fontWeight: "bold", color: "red"},
 	robberChip: {
 		alignItems: "center",
 		justifyContent: "center",
@@ -222,7 +231,7 @@ let styles = StyleSheet.create({
 		borderRadius: nodeDiameter / 2.0,
 		backgroundColor: '#cc0000',
 		top:  0,
-		left: 10,
+		left: 10 / 220 * Globals.hexagonSpacing,
 	
 	},
 	

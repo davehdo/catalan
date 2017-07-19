@@ -470,7 +470,7 @@ class GameHome extends Component {
 		<View style={styles.container}>
       	
 			<View style={{ flexDirection: "row", justifyContent: "flex-start", padding: 10, backgroundColor: "tan" }}>
-			 	<View style={{ backgroundColor: user.props.color, height: 50, width: 50 }} />
+			 	<View style={{ backgroundColor: user.props.color, height: 40, width: 40 }} />
 
 			 	<View style={{ flex: 1 }}>
 			 		{ 
@@ -495,19 +495,20 @@ class GameHome extends Component {
 			 	</View>
 			</View>
 			
-			<ScrollView contentContainerStyle={{ top: -60 }}>
-				<WorldMap 
-		 			highlightNumber={ state.game.thisTurnRolled }
-		 			onPressNode={ (id) => this.buildNode({user, node: HexNode.find({id, store})} )}
-					onPressEdge={ (id) => this.buildRoad({user, edge: Edge.find({id, store})} )} 
-					onPressHexagon={ (id) => this.moveRobber(id)} 
-					userById={ (id) => User.find({id, store: this.context.store}) }
-					map={ state.map } />
+			<ScrollView contentContainerStyle={{ top: -60, height: 540 }} horizontal={ true }>
+				<View style={{ alignItems: "center" }}>
+					<WorldMap 
+			 			highlightNumber={ state.game.thisTurnRolled }
+			 			onPressNode={ !state.game.requireRobberMove ? ((id) => this.buildNode({user, node: HexNode.find({id, store})} )) : undefined}
+						onPressEdge={ !state.game.requireRobberMove ? ((id) => this.buildRoad({user, edge: Edge.find({id, store})} )) : undefined} 
+						onPressHexagon={ state.game.requireRobberMove ? ((id) => this.moveRobber(id)) : undefined} 
+						userById={ (id) => User.find({id, store: this.context.store}) }
+						map={ state.map } />
 		
-				<UserAssetsShow user={ User.signedIn({store}) } 
-					onPressDevCard={ (c) => this.onPressDevCard({card: c, user: User.signedIn({store}) }) }/>
+					<UserAssetsShow user={ User.signedIn({store}) } 
+						onPressDevCard={ (c) => this.onPressDevCard({card: c, user: User.signedIn({store}) }) }/>
+				</View>
 			</ScrollView>
-					
  			<View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "black", padding: 10}}>
 	 				 <Button
 	 				   onPress={() => this.endTurn({user })}
