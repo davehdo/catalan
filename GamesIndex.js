@@ -12,7 +12,7 @@ import {
 	ScrollView
 } from 'react-native';
 
-const GameHome = require('./GameHome');
+const GamesShow = require('./GamesShow');
 // const User = require('./User.js');
 // const Globals = require("./Globals.js")
 // const UserAssetsShow = require("./UserAssetsShow.js")
@@ -57,7 +57,7 @@ class GamesIndex extends Component {
 	showGame( id ) {
 		this.props.navigator.push({
 			title: 'Catalan',
-			component: GameHome,
+			component: GamesShow,
 			passProps: {}
 		});		
 	}

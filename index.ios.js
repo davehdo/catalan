@@ -36,7 +36,7 @@ const configureStore = (initialState) => {
 
 const store = configureStore({})
 // store.subscripe( render )
-const GameHome = require('./GameHome');
+const GamesShow = require('./GamesShow');
 const GamesIndex = require('./GamesIndex');
 const WorldMap = require('./WorldMap');
 const User = require('./User.js');

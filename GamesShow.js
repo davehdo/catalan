@@ -28,7 +28,7 @@ const Edge = require("./Edge.js")
 const Hexagon = require("./Hexagon.js")
 
 
-class GameHome extends Component {
+class GamesShow extends Component {
 	constructor(props) {
 		super(props);
 
@@ -544,7 +544,7 @@ class GameHome extends Component {
 }
 
 // allows us to access store as this.context.store
-GameHome.contextTypes = {
+GamesShow.contextTypes = {
 	store: React.PropTypes.object,
 }
 
@@ -575,4 +575,4 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = GameHome;
+module.exports = GamesShow;
