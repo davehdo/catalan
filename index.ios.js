@@ -37,6 +37,7 @@ const configureStore = (initialState) => {
 const store = configureStore({})
 // store.subscripe( render )
 const GameHome = require('./GameHome');
+const GamesIndex = require('./GamesIndex');
 const WorldMap = require('./WorldMap');
 const User = require('./User.js');
 //
@@ -63,8 +64,8 @@ export default class Catalan extends Component {
 				<NavigatorIOS
 				style={styles.container}
 				initialRoute={{
-				 title: `Catalan`,
-				 component: GameHome,
+				 title: `Games`,
+				 component: GamesIndex,
 				  passProps: {}
 				}}/>
 			</Provider>
